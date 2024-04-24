@@ -36,6 +36,8 @@ public class LadderStats
     public string? CreatedOn { get; set; }
     public string? BasePointsToPromote { get; set; }
     public List<string>? LadderTypes { get; set; }
+    public int Round { get; set; }
+    public int Ladder { get; set; }
 }
 
 public class LadderAppearance

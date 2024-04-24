@@ -84,6 +84,29 @@
         //invertRoundsToPlayers();
     }
 
+    private void UpdateLaddersWithRL()
+    {
+        var dirInfo = new DirectoryInfo("C:\\Users\\admin\\source\\repos\\MoreFairStats\\MoreFairStats\\Data\\Ladders\\");
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        foreach (var ladderFile in dirInfo.GetFiles())
+        {
+            var ladderFilePath = ladderFile.FullName;
+            var ladderJson = File.ReadAllText(ladderFilePath);
+            var ladder = JsonSerializer.Deserialize<LadderStats>(ladderJson, options);
+
+            var fileName = ladderFile.Name.Split('.')[0]; // remove extension
+            var roundAndLadder = fileName.Split('L');
+            var roundNum = roundAndLadder[0].Substring(1);
+            var ladderNum = roundAndLadder[1];
+            ladder!.Ladder = int.Parse(ladderNum);
+            ladder.Round = int.Parse(roundNum);
+
+
+            var jsonString = JsonSerializer.Serialize(ladder);
+            File.WriteAllText(ladderFilePath, jsonString);
+        }
+    }
+
     private void UpdateRoundsWithLadderNumbers()
     {
         for (int i = 1; i <= currentMaxRound; i++)
