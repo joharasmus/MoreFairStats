@@ -1,0 +1,104 @@
+﻿
+<h5 style="color:#e7d5b3">Select which ladder to show:</h5>
+<nav>
+    @for (int i = 0; i <= maxLadder / 50; i++)
+    {
+    <ul class="pagination" style="margin:0px">
+        @for (int j = 1; j <= 50 && j + i * 50 <= maxLadder; j++)
+        {
+            var localVal = j + i * 50;
+            <li class="page-item">
+                 <button class="page-link border-warning" @onclick="@(() => shiftLadder(localVal.ToString()))" style="width:50px; background-color:@(localVal.ToString() == currentLadder ? "#de9e41" : "#10141f"); color:@(localVal.ToString() == currentLadder ? "#090a14" : "#e7d5b3")">@(localVal)</button>
+            </li>
+        }
+    </ul>
+    }
+</nav>
+
+<br>
+
+<div class="card border-warning" style="width:35rem; background-color:#10141f; color:#e7d5b3">
+    <div class="card-body">
+        <h3 class="card-title">Stats for ladder @currentLadder</h3>
+    </div>
+</div>
+<div class="card-group" style="width:35rem; color:#e7d5b3">
+    <div class="card border-warning" style="background-color:#10141f">
+        <div class="card-header border-warning">Ladder info</div>
+        <div class="card-body">
+            <p>Base points: <b>@(AddSeparators(ladderStats.BasePointsToPromote!))</b></p>
+            <p class="card-text">Ladder types: @string.Join(", ", ladderStats.LadderTypes!)</p>
+        </div>
+    </div>
+    <div class="card border-warning" style="background-color:#10141f">
+        <div class="card-header border-warning">Ladder start</div>
+        <div class="card-body">
+            <p class="card-text">Date: @ladderStats.CreatedOn!.Substring(0, 19).Split('T')[0]</p>
+            <p class="card-text">Time: @ladderStats.CreatedOn!.Substring(0, 19).Split('T')[1]</p>
+        </div>
+    </div>
+</div>
+
+<br>
+
+<table class="table table-borderless" style="background-color:#10141f; color:#e7d5b3">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Rank</th>
+            <th>Points</th>
+            <th>Power</th>
+            <th>Bias</th>
+            <th>Multi</th>
+            <th>Grapes</th>
+            <th>Vinegar</th>
+            <th>AutoPromote</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var ranker in ladderStats.Rankers!)
+    {                
+        <tr class="@(ranker.Growing ? "" : "table-dark")">
+            <td>@ranker.AccountId</td>
+            <td>@ranker.UserName</td>
+            <td>@ranker.Rank</td>
+            <td>@(AddSeparators(ranker.Points!))</td>
+            <td>@(AddSeparators(ranker.Power!))</td>
+            <td>@ranker.Bias</td>
+            <td>@ranker.Multi</td>
+            <td>@(AddSeparators(ranker.Grapes!))</td>
+            <td>@(AddSeparators(ranker.Vinegar!))</td>
+            <td>@ranker.AutoPromote</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+
+    [Parameter]
+    public RoundStats? roundStats { get; set; }
+
+    public int maxLadder => roundStats!.Ladders!.Count;
+
+    public LadderStats ladderStats => roundStats!.Ladders![currentLadder!];
+
+    public string? currentLadder { get; set; }
+
+    public string AddSeparators(string number)
+    {
+        return Int64.Parse(number).ToString("N0");
+    }
+
+    private void shiftLadder(string ladderNum)
+    {
+        currentLadder = ladderNum;
+        StateHasChanged();
+    }
+
+    protected override void OnParametersSet()
+    {
+        currentLadder = roundStats!.Ladders!.Keys.Last();
+    }
+}

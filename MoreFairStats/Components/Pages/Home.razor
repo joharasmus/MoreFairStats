@@ -1,0 +1,204 @@
+﻿@page "/"
+@using System.Text.Json
+@using MoreFairStats.Components
+
+<PageTitle>Home</PageTitle>
+
+<form @onsubmit="() => { return; }">
+    <div class="input-group" style="width:25rem;">
+        <span class="input-group-text border-warning" style="background-color:#10141f; color:#e7d5b3">View stats for round number</span>
+        <input type="number" class="form-control border-warning" @bind="RoundNumber" @bind:event="oninput"/>
+        <button type="button" class="btn btn-outline-warning" @onclick="(() => RoundNumber--)">&#8722;</button>
+        <button type="button" class="btn btn-outline-warning" @onclick="(() => RoundNumber++)">&#43;</button>
+    </div>
+</form>
+<br>
+
+@if(roundStats != null)
+{
+    <div class="card border border-warning" style="width:50rem; background-color:#10141f; color:#e7d5b3">
+        <div class="card-body">
+            <h3 class="card-title">Stats for round @roundStats.Number</h3>
+        </div>
+    </div>
+    <div class="card-group" style="width:50rem; background-color:#10141f; color:#e7d5b3">
+        <div class="card border-warning" style="background-color:#10141f; color:#e7d5b3">
+            <div class="card-header border-warning">Round info</div>
+            <div class="card-body">
+                <p>Base points: <b>@Int64.Parse(roundStats.BasePointsToPromote!).ToString("N0")</b></p>
+                <p class="card-text">Round types: @string.Join(", ", roundStats.RoundTypes!)</p>
+            </div>
+        </div>
+            <div class="card border-warning" style="background-color:#10141f; color:#e7d5b3">
+            <div class="card-header border-warning">Round start</div>
+            <div class="card-body">
+                <p class="card-text">Date: @roundStats.CreatedOn!.Substring(0, 19).Split('T')[0]</p>
+                <p class="card-text">Time: @roundStats.CreatedOn!.Substring(0, 19).Split('T')[1]</p>
+            </div>
+        </div>
+        <div class="card border-warning" style="background-color:#10141f; color:#e7d5b3">
+            <div class="card-header border-warning">Round ending</div>
+            <div class="card-body">
+                <p class="card-text">Date: @roundStats.ClosedOn!.Substring(0, 19).Split('T')[0]</p>
+                <p class="card-text">Time: @roundStats.ClosedOn!.Substring(0, 19).Split('T')[1]</p>
+            </div>
+        </div>
+    </div>
+    <br>
+
+    <RankersTable roundStats="@roundStats"></RankersTable>
+}
+
+
+@code{
+    private int currentMaxRound => statsConfig!.CurrentMaxRound;
+
+    private int _roundNumber;
+
+    private int RoundNumber 
+    { 
+        get => _roundNumber;
+        set 
+        { 
+            _roundNumber = value < 1 ? 1 : (value > currentMaxRound ? currentMaxRound : value);
+            updateRoundNumber();
+        }
+    }
+
+    private RoundStats? roundStats;
+
+    private Config? statsConfig;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        parseStatsConfig();
+        //await getRoundStats(currentMaxRound);
+        RoundNumber = currentMaxRound;
+        parseRoundStats(currentMaxRound);
+        //UpdatePlayersWithNewNames();
+        //invertRoundsToPlayers();
+    }
+
+    private void updateRoundNumber()
+    {
+        parseRoundStats(RoundNumber);
+        StateHasChanged();
+    }
+
+    private void parseStatsConfig()
+    {
+        var workingDirectory = Environment.CurrentDirectory;
+        var fileName = workingDirectory + $"\\Data\\config.json";
+        var jsonString = File.ReadAllText(fileName);
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        statsConfig = JsonSerializer.Deserialize<Config>(jsonString, options);
+    }
+
+    private void parseRoundStats(int round)
+    {
+        var workingDirectory = Environment.CurrentDirectory;
+        var fileName = workingDirectory + $"\\Data\\round{round}.json";
+        var jsonString = File.ReadAllText(fileName);
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        roundStats = JsonSerializer.Deserialize<RoundStats>(jsonString, options);
+    }
+
+    private async Task getRoundStats(int round)
+    {
+        var client = new HttpClient();
+        var response = await client.GetAsync($"https://fair.kaliburg.de/api/stats/round/raw?number={round}");
+        var bodyString = await response.Content.ReadAsStringAsync();
+        var workingDirectory = Environment.CurrentDirectory;
+        var fileName = workingDirectory + $"\\Data\\round{round}.json";
+        File.WriteAllText(fileName, bodyString);
+    }
+
+    private void UpdatePlayersWithNewNames()
+    {
+        var firstLadder = roundStats!.Ladders!["1"];
+        var firstLadderRankers = firstLadder.Rankers;
+        for (int i = currentMaxRound - 1; i >= 1; i--)
+        {
+            parseRoundStats(i);
+            foreach (var ladder in roundStats.Ladders.Values)
+            {
+                foreach (var ranker in ladder.Rankers!)
+                {
+                    var matchRanker = firstLadderRankers!.Find(r => r.AccountId == ranker.AccountId);
+                    if (matchRanker == null) continue;
+                    ranker.UserName = matchRanker.UserName;
+                    ranker.AssholePoints = matchRanker.AssholePoints;
+                }
+            }
+            var jsonString = JsonSerializer.Serialize(roundStats);
+            var filePath = Environment.CurrentDirectory + $"\\Data\\round{i}.json";
+            File.WriteAllText(filePath, jsonString);
+            Console.WriteLine(i);
+        }
+    }
+
+    private void invertRoundsToPlayers()
+    {
+        var allRankers = new SortedDictionary<int, PlayerStats>();
+        for (int i = 1; i <= currentMaxRound; i++)
+        {
+            parseRoundStats(i);
+            var firstLadder = roundStats!.Ladders!["1"];
+            foreach (var ranker in firstLadder.Rankers!)
+            {
+                if (!allRankers.ContainsKey(ranker.AccountId))
+                {
+                    var player = new PlayerStats() { AccountId = ranker.AccountId, AHPoints = ranker.AssholePoints, UserName = ranker.UserName };
+                    allRankers[ranker.AccountId] = player;
+                }
+                var roundApp = new RoundAppearance()
+                    {
+                        Ladders = [],
+                        RoundTypes = roundStats.RoundTypes,
+                        BasePointsToPromote = roundStats.BasePointsToPromote,
+                        CreatedOn = roundStats.CreatedOn,
+                        ClosedOn = roundStats.ClosedOn,
+                        Number = roundStats.Number
+                    };
+                allRankers[ranker.AccountId].RoundAppearances!.Add(roundApp);
+                foreach (var keyVal in roundStats.Ladders)
+                {
+                    var ladderNum = keyVal.Key;
+                    var ladder = keyVal.Value;
+                    var ladderRanker = ladder.Rankers!.Find(r => r.AccountId == ranker.AccountId);
+                    var ladderApp = new LadderAppearance()
+                        {
+                            CreatedOn = ladder.CreatedOn,
+                            BasePointsToPromote = ladder.BasePointsToPromote,
+                            LadderTypes = ladder.LadderTypes,
+                            Rank = ladderRanker!.Rank,
+                            Points = ladderRanker.Points,
+                            Power = ladderRanker.Power,
+                            Multi = ladderRanker.Multi,
+                            Bias = ladderRanker.Bias,
+                            Grapes = ladderRanker.Grapes,
+                            Vinegar = ladderRanker.Vinegar,
+                            AutoPromote = ladderRanker.AutoPromote,
+                            Growing = ladderRanker.Growing
+                        };
+                    roundApp.Ladders[ladderNum] = ladderApp;
+                    if (ladderRanker.Growing) break;
+                }
+
+            }
+            Console.WriteLine(i);
+        }
+        var tunaStats = allRankers[36780];
+        foreach (var appearance in tunaStats.RoundAppearances)
+        {
+            Console.WriteLine(appearance.Number);
+            Console.WriteLine(appearance.Ladders!.Values.Last().Vinegar);
+        }
+        var jsonString = JsonSerializer.Serialize(allRankers);
+        Console.WriteLine("Serialized!");
+        var fileName = "allRankers.json";
+        var filePath = Environment.CurrentDirectory + $"\\Data\\{fileName}";
+        File.WriteAllText(filePath, jsonString);
+    }
+}
