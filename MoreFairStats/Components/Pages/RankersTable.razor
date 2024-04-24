@@ -26,7 +26,7 @@
     <div class="card border-warning" style="background-color:#10141f">
         <div class="card-header border-warning">Ladder info</div>
         <div class="card-body">
-            <p>Base points: <b>@(AddSeparators(ladderStats.BasePointsToPromote!))</b></p>
+            <p>Base points: <b>@(AddSeparators(ladderStats!.BasePointsToPromote!))</b></p>
             <p class="card-text">Ladder types: @string.Join(", ", ladderStats.LadderTypes!)</p>
         </div>
     </div>
@@ -76,29 +76,47 @@
 </table>
 
 @code {
+    private NewRoundStats? _roundStats;
 
     [Parameter]
-    public RoundStats? roundStats { get; set; }
+    public NewRoundStats? roundStats { get; set; }
 
-    public int maxLadder => roundStats!.Ladders!.Count;
+    public int maxLadder => roundStats!.NumberOfLadders;
 
-    public LadderStats ladderStats => roundStats!.Ladders![currentLadder!];
+    [Parameter]
+    public LadderStats? ladderStats { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnLadderClickCallback { get; set; }
 
     public string? currentLadder { get; set; }
+
+    private bool openingNewRound = true;
 
     public string AddSeparators(string number)
     {
         return Int64.Parse(number).ToString("N0");
     }
 
-    private void shiftLadder(string ladderNum)
+    private async void shiftLadder(string ladderNum)
     {
         currentLadder = ladderNum;
+        await OnLadderClickCallback.InvokeAsync(ladderNum);
         StateHasChanged();
     }
 
     protected override void OnParametersSet()
     {
-        currentLadder = roundStats!.Ladders!.Keys.Last();
+        if (_roundStats != roundStats)
+        {
+            _roundStats = roundStats;
+            openingNewRound = true;
+        }
+
+        if (openingNewRound)
+        {
+            currentLadder = roundStats!.NumberOfLadders.ToString();
+            openingNewRound = false;
+        }
     }
 }

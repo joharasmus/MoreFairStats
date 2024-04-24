@@ -20,6 +20,16 @@ public class RoundAppearance
     public int Number { get; set; }
 }
 
+public class NewRoundStats
+{
+    public List<string>? RoundTypes { get; set; }
+    public string? BasePointsToPromote { get; set; }
+    public string? CreatedOn { get; set; }
+    public string? ClosedOn { get; set; }
+    public int Number { get; set; }
+    public int NumberOfLadders { get; set; }
+}
+
 public class LadderStats
 {
     public List<Ranker>? Rankers { get; set; }
@@ -66,17 +76,6 @@ public class PlayerStats
     public string? UserName { get; set; }
     public int AHPoints { get; set; }
     public List<RoundAppearance> RoundAppearances { get; set; } = [];
-}
-
-public class ByPlayerExtension : IComparer<PlayerStats>
-{
-    public int Compare(PlayerStats? x, PlayerStats? y)
-    {
-        if (x == null || y == null) throw new ArgumentNullException();
-        if (x.AccountId == y.AccountId) return 0;
-        if (x.AccountId < y.AccountId) return -1;
-        return 1;
-    }
 }
 
 public class Config

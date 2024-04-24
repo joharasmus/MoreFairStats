@@ -46,7 +46,7 @@
     </div>
     <br>
 
-    <RankersTable roundStats="@roundStats"></RankersTable>
+    <RankersTable roundStats="@roundStats" ladderStats="@ladderStats" OnLadderClickCallback="@updateLadderNumber" ></RankersTable>
 }
 
 
@@ -65,7 +65,11 @@
         }
     }
 
-    private RoundStats? roundStats;
+    private NewRoundStats? roundStats;
+
+    private RoundStats? oldRoundStats;
+
+    private LadderStats? ladderStats;
 
     private Config? statsConfig;
 
@@ -80,10 +84,37 @@
         //invertRoundsToPlayers();
     }
 
+    private void UpdateRoundsWithLadderNumbers()
+    {
+        for (int i = 1; i <= currentMaxRound; i++)
+        {
+            parseRoundStats(i);
+            var newRoundStats = new NewRoundStats()
+                {
+                    BasePointsToPromote = oldRoundStats!.BasePointsToPromote,
+                    ClosedOn = oldRoundStats.ClosedOn,
+                    CreatedOn = oldRoundStats.CreatedOn,
+                    Number = oldRoundStats.Number,
+                    NumberOfLadders = oldRoundStats.Ladders!.Count,
+                    RoundTypes = oldRoundStats.RoundTypes
+                };
+            var jsonString = JsonSerializer.Serialize(newRoundStats);
+            var filePath = Environment.CurrentDirectory + $"\\Data\\Rounds\\R{i}.json";
+            File.WriteAllText(filePath, jsonString);
+        }
+    }
+
     private void updateRoundNumber()
     {
         parseRoundStats(RoundNumber);
+        ladderStats = parseLadderStats(RoundNumber, roundStats!.NumberOfLadders); //Always use the last ladder, which has the same number as the count
         StateHasChanged();
+    }
+
+    private void updateLadderNumber(string ladderNum)
+    {
+        var intLadderNum = Int32.Parse(ladderNum);
+        ladderStats = parseLadderStats(RoundNumber, intLadderNum);
     }
 
     private void parseStatsConfig()
@@ -98,10 +129,19 @@
     private void parseRoundStats(int round)
     {
         var workingDirectory = Environment.CurrentDirectory;
-        var fileName = workingDirectory + $"\\Data\\round{round}.json";
+        var newFileName = workingDirectory + $"\\Data\\Rounds\\R{round}.json";
+        var newJsonString = File.ReadAllText(newFileName);
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        roundStats = JsonSerializer.Deserialize<NewRoundStats>(newJsonString, options);
+    }
+
+    private LadderStats parseLadderStats(int round, int ladder)
+    {
+        var workingDirectory = Environment.CurrentDirectory;
+        var fileName = workingDirectory + $"\\Data\\Ladders\\R{round}L{ladder}.json";
         var jsonString = File.ReadAllText(fileName);
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        roundStats = JsonSerializer.Deserialize<RoundStats>(jsonString, options);
+        return JsonSerializer.Deserialize<LadderStats>(jsonString, options)!;
     }
 
     private async Task getRoundStats(int round)
@@ -116,89 +156,88 @@
 
     private void UpdatePlayersWithNewNames()
     {
-        var firstLadder = roundStats!.Ladders!["1"];
+        var firstLadder = parseLadderStats(currentMaxRound, 1);
         var firstLadderRankers = firstLadder.Rankers;
-        for (int i = currentMaxRound - 1; i >= 1; i--)
+        var dirInfo = new DirectoryInfo("C:\\Users\\admin\\source\\repos\\MoreFairStats\\MoreFairStats\\Data\\Ladders\\");
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        foreach (var ladderFile in dirInfo.GetFiles())
         {
-            parseRoundStats(i);
-            foreach (var ladder in roundStats.Ladders.Values)
+            var ladderFilePath = ladderFile.FullName;
+            var ladderJson = File.ReadAllText(ladderFilePath);
+            var ladder = JsonSerializer.Deserialize<LadderStats>(ladderJson, options);
+            foreach (var ranker in ladder!.Rankers!)
             {
-                foreach (var ranker in ladder.Rankers!)
-                {
-                    var matchRanker = firstLadderRankers!.Find(r => r.AccountId == ranker.AccountId);
-                    if (matchRanker == null) continue;
-                    ranker.UserName = matchRanker.UserName;
-                    ranker.AssholePoints = matchRanker.AssholePoints;
-                }
+                var matchRanker = firstLadderRankers!.Find(r => r.AccountId == ranker.AccountId);
+                if (matchRanker == null) continue;
+                ranker.UserName = matchRanker.UserName;
+                ranker.AssholePoints = matchRanker.AssholePoints;
             }
-            var jsonString = JsonSerializer.Serialize(roundStats);
-            var filePath = Environment.CurrentDirectory + $"\\Data\\round{i}.json";
-            File.WriteAllText(filePath, jsonString);
-            Console.WriteLine(i);
+            var jsonString = JsonSerializer.Serialize(ladder);
+            File.WriteAllText(ladderFilePath, jsonString);
         }
     }
 
-    private void invertRoundsToPlayers()
-    {
-        var allRankers = new SortedDictionary<int, PlayerStats>();
-        for (int i = 1; i <= currentMaxRound; i++)
-        {
-            parseRoundStats(i);
-            var firstLadder = roundStats!.Ladders!["1"];
-            foreach (var ranker in firstLadder.Rankers!)
-            {
-                if (!allRankers.ContainsKey(ranker.AccountId))
-                {
-                    var player = new PlayerStats() { AccountId = ranker.AccountId, AHPoints = ranker.AssholePoints, UserName = ranker.UserName };
-                    allRankers[ranker.AccountId] = player;
-                }
-                var roundApp = new RoundAppearance()
-                    {
-                        Ladders = [],
-                        RoundTypes = roundStats.RoundTypes,
-                        BasePointsToPromote = roundStats.BasePointsToPromote,
-                        CreatedOn = roundStats.CreatedOn,
-                        ClosedOn = roundStats.ClosedOn,
-                        Number = roundStats.Number
-                    };
-                allRankers[ranker.AccountId].RoundAppearances!.Add(roundApp);
-                foreach (var keyVal in roundStats.Ladders)
-                {
-                    var ladderNum = keyVal.Key;
-                    var ladder = keyVal.Value;
-                    var ladderRanker = ladder.Rankers!.Find(r => r.AccountId == ranker.AccountId);
-                    var ladderApp = new LadderAppearance()
-                        {
-                            CreatedOn = ladder.CreatedOn,
-                            BasePointsToPromote = ladder.BasePointsToPromote,
-                            LadderTypes = ladder.LadderTypes,
-                            Rank = ladderRanker!.Rank,
-                            Points = ladderRanker.Points,
-                            Power = ladderRanker.Power,
-                            Multi = ladderRanker.Multi,
-                            Bias = ladderRanker.Bias,
-                            Grapes = ladderRanker.Grapes,
-                            Vinegar = ladderRanker.Vinegar,
-                            AutoPromote = ladderRanker.AutoPromote,
-                            Growing = ladderRanker.Growing
-                        };
-                    roundApp.Ladders[ladderNum] = ladderApp;
-                    if (ladderRanker.Growing) break;
-                }
+    // private void invertRoundsToPlayers()
+    // {
+    //     var allRankers = new SortedDictionary<int, PlayerStats>();
+    //     for (int i = 1; i <= currentMaxRound; i++)
+    //     {
+    //         parseRoundStats(i);
+    //         var firstLadder = roundStats!.Ladders!["1"];
+    //         foreach (var ranker in firstLadder.Rankers!)
+    //         {
+    //             if (!allRankers.ContainsKey(ranker.AccountId))
+    //             {
+    //                 var player = new PlayerStats() { AccountId = ranker.AccountId, AHPoints = ranker.AssholePoints, UserName = ranker.UserName };
+    //                 allRankers[ranker.AccountId] = player;
+    //             }
+    //             var roundApp = new RoundAppearance()
+    //                 {
+    //                     Ladders = [],
+    //                     RoundTypes = roundStats.RoundTypes,
+    //                     BasePointsToPromote = roundStats.BasePointsToPromote,
+    //                     CreatedOn = roundStats.CreatedOn,
+    //                     ClosedOn = roundStats.ClosedOn,
+    //                     Number = roundStats.Number
+    //                 };
+    //             allRankers[ranker.AccountId].RoundAppearances!.Add(roundApp);
+    //             foreach (var keyVal in roundStats.Ladders)
+    //             {
+    //                 var ladderNum = keyVal.Key;
+    //                 var ladder = keyVal.Value;
+    //                 var ladderRanker = ladder.Rankers!.Find(r => r.AccountId == ranker.AccountId);
+    //                 var ladderApp = new LadderAppearance()
+    //                     {
+    //                         CreatedOn = ladder.CreatedOn,
+    //                         BasePointsToPromote = ladder.BasePointsToPromote,
+    //                         LadderTypes = ladder.LadderTypes,
+    //                         Rank = ladderRanker!.Rank,
+    //                         Points = ladderRanker.Points,
+    //                         Power = ladderRanker.Power,
+    //                         Multi = ladderRanker.Multi,
+    //                         Bias = ladderRanker.Bias,
+    //                         Grapes = ladderRanker.Grapes,
+    //                         Vinegar = ladderRanker.Vinegar,
+    //                         AutoPromote = ladderRanker.AutoPromote,
+    //                         Growing = ladderRanker.Growing
+    //                     };
+    //                 roundApp.Ladders[ladderNum] = ladderApp;
+    //                 if (ladderRanker.Growing) break;
+    //             }
 
-            }
-            Console.WriteLine(i);
-        }
-        var tunaStats = allRankers[36780];
-        foreach (var appearance in tunaStats.RoundAppearances)
-        {
-            Console.WriteLine(appearance.Number);
-            Console.WriteLine(appearance.Ladders!.Values.Last().Vinegar);
-        }
-        var jsonString = JsonSerializer.Serialize(allRankers);
-        Console.WriteLine("Serialized!");
-        var fileName = "allRankers.json";
-        var filePath = Environment.CurrentDirectory + $"\\Data\\{fileName}";
-        File.WriteAllText(filePath, jsonString);
-    }
+    //         }
+    //         Console.WriteLine(i);
+    //     }
+    //     var tunaStats = allRankers[36780];
+    //     foreach (var appearance in tunaStats.RoundAppearances)
+    //     {
+    //         Console.WriteLine(appearance.Number);
+    //         Console.WriteLine(appearance.Ladders!.Values.Last().Vinegar);
+    //     }
+    //     var jsonString = JsonSerializer.Serialize(allRankers);
+    //     Console.WriteLine("Serialized!");
+    //     var fileName = "allRankers.json";
+    //     var filePath = Environment.CurrentDirectory + $"\\Data\\{fileName}";
+    //     File.WriteAllText(filePath, jsonString);
+    // }
 }
