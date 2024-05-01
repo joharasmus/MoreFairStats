@@ -172,9 +172,30 @@
         var client = new HttpClient();
         var response = await client.GetAsync($"https://fair.kaliburg.de/api/stats/round/raw?number={round}");
         var bodyString = await response.Content.ReadAsStringAsync();
-        var workingDirectory = Environment.CurrentDirectory;
-        var fileName = workingDirectory + $"\\Data\\round{round}.json";
-        File.WriteAllText(fileName, bodyString);
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var roundData = JsonSerializer.Deserialize<RoundStats>(bodyString, options);
+        var newRoundStats = new NewRoundStats()
+        {
+            BasePointsToPromote = roundData!.BasePointsToPromote,
+            ClosedOn = roundData.ClosedOn,
+            CreatedOn = roundData.CreatedOn,
+            Number = roundData.Number,
+            NumberOfLadders = roundData.Ladders!.Count,
+            RoundTypes = roundData.RoundTypes
+        };
+        var newRoundStatsString = JsonSerializer.Serialize(newRoundStats);
+        var dataDirectory = Environment.CurrentDirectory + "\\Data";
+        var roundStatsFilePath = dataDirectory + $"\\Rounds\\R{round}.json";
+        File.WriteAllText(roundStatsFilePath, newRoundStatsString);
+        foreach (var ladder in roundData.Ladders)
+        {
+            var ladderStats = ladder.Value;
+            ladderStats.Round = roundData.Number;
+            ladderStats.Ladder = int.Parse(ladder.Key);
+            var ladderStatsString = JsonSerializer.Serialize(ladderStats);
+            var ladderStatsPath = dataDirectory + $"\\Ladders\\R{round}L{ladder.Key}.json";
+            File.WriteAllText(ladderStatsPath, ladderStatsString);
+        }
     }
 
     private void UpdatePlayersWithNewNames()
@@ -187,6 +208,8 @@
         {
             var ladderFilePath = ladderFile.FullName;
             var ladderJson = File.ReadAllText(ladderFilePath);
+            Console.WriteLine(ladderJson);
+            // Something is wrong here - it complains about ladderJson being invalid json?
             var ladder = JsonSerializer.Deserialize<LadderStats>(ladderJson, options);
             foreach (var ranker in ladder!.Rankers!)
             {
