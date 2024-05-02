@@ -1,6 +1,9 @@
 ﻿@page "/"
 @using System.Text.Json
+@using Azure.Identity
+@using Microsoft.Azure.Cosmos
 @using MoreFairStats.Components
+@inject Database dataBase
 
 <PageTitle>Home</PageTitle>
 
@@ -79,65 +82,22 @@
         parseStatsConfig();
         //await getRoundStats(currentMaxRound);
         RoundNumber = currentMaxRound;
-        parseRoundStats(currentMaxRound);
         //UpdatePlayersWithNewNames();
         //invertRoundsToPlayers();
     }
 
-    private void UpdateLaddersWithRL()
+    private async void updateRoundNumber()
     {
-        var dirInfo = new DirectoryInfo("C:\\Users\\admin\\source\\repos\\MoreFairStats\\MoreFairStats\\Data\\Ladders\\");
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        foreach (var ladderFile in dirInfo.GetFiles())
-        {
-            var ladderFilePath = ladderFile.FullName;
-            var ladderJson = File.ReadAllText(ladderFilePath);
-            var ladder = JsonSerializer.Deserialize<LadderStats>(ladderJson, options);
-
-            var fileName = ladderFile.Name.Split('.')[0]; // remove extension
-            var roundAndLadder = fileName.Split('L');
-            var roundNum = roundAndLadder[0].Substring(1);
-            var ladderNum = roundAndLadder[1];
-            ladder!.Ladder = int.Parse(ladderNum);
-            ladder.Round = int.Parse(roundNum);
-
-
-            var jsonString = JsonSerializer.Serialize(ladder);
-            File.WriteAllText(ladderFilePath, jsonString);
-        }
-    }
-
-    private void UpdateRoundsWithLadderNumbers()
-    {
-        for (int i = 1; i <= currentMaxRound; i++)
-        {
-            parseRoundStats(i);
-            var newRoundStats = new NewRoundStats()
-                {
-                    BasePointsToPromote = oldRoundStats!.BasePointsToPromote,
-                    ClosedOn = oldRoundStats.ClosedOn,
-                    CreatedOn = oldRoundStats.CreatedOn,
-                    Number = oldRoundStats.Number,
-                    NumberOfLadders = oldRoundStats.Ladders!.Count,
-                    RoundTypes = oldRoundStats.RoundTypes
-                };
-            var jsonString = JsonSerializer.Serialize(newRoundStats);
-            var filePath = Environment.CurrentDirectory + $"\\Data\\Rounds\\R{i}.json";
-            File.WriteAllText(filePath, jsonString);
-        }
-    }
-
-    private void updateRoundNumber()
-    {
-        parseRoundStats(RoundNumber);
-        ladderStats = parseLadderStats(RoundNumber, roundStats!.NumberOfLadders); //Always use the last ladder, which has the same number as the count
+        await parseRoundStats(RoundNumber);
+        ladderStats = await parseLadderStats(RoundNumber, roundStats!.NumberOfLadders); //Always use the last ladder, which has the same number as the count
         StateHasChanged();
     }
 
-    private void updateLadderNumber(string ladderNum)
+    private async void updateLadderNumber(string ladderNum)
     {
         var intLadderNum = Int32.Parse(ladderNum);
-        ladderStats = parseLadderStats(RoundNumber, intLadderNum);
+        ladderStats = await parseLadderStats(RoundNumber, intLadderNum);
+        StateHasChanged();
     }
 
     private void parseStatsConfig()
@@ -149,22 +109,18 @@
         statsConfig = JsonSerializer.Deserialize<Config>(jsonString, options);
     }
 
-    private void parseRoundStats(int round)
+    private async Task parseRoundStats(int round)
     {
-        var workingDirectory = Environment.CurrentDirectory;
-        var newFileName = workingDirectory + $"\\Data\\Rounds\\R{round}.json";
-        var newJsonString = File.ReadAllText(newFileName);
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        roundStats = JsonSerializer.Deserialize<NewRoundStats>(newJsonString, options);
+        var container = dataBase.GetContainer("mfs-rounds");
+        var respItem = await container.ReadItemAsync<NewRoundStats>(round.ToString(), new PartitionKey(round));
+        roundStats = respItem.Resource;
     }
 
-    private LadderStats parseLadderStats(int round, int ladder)
+    private async Task<LadderStats> parseLadderStats(int round, int ladder)
     {
-        var workingDirectory = Environment.CurrentDirectory;
-        var fileName = workingDirectory + $"\\Data\\Ladders\\R{round}L{ladder}.json";
-        var jsonString = File.ReadAllText(fileName);
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        return JsonSerializer.Deserialize<LadderStats>(jsonString, options)!;
+        var container = dataBase.GetContainer("mfs-ladders");
+        var respItem = await container.ReadItemAsync<LadderStats>($"R{round}L{ladder}", new PartitionKey(round));
+        return respItem.Resource;
     }
 
     private async Task getRoundStats(int round)
@@ -198,18 +154,17 @@
         }
     }
 
-    private void UpdatePlayersWithNewNames()
+    private async void UpdatePlayersWithNewNames()
     {
-        var firstLadder = parseLadderStats(currentMaxRound, 1);
+        var firstLadder = await parseLadderStats(currentMaxRound, 1);
         var firstLadderRankers = firstLadder.Rankers;
         var dirInfo = new DirectoryInfo("C:\\Users\\admin\\source\\repos\\MoreFairStats\\MoreFairStats\\Data\\Ladders\\");
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         foreach (var ladderFile in dirInfo.GetFiles())
         {
             var ladderFilePath = ladderFile.FullName;
+            Console.WriteLine(ladderFilePath);
             var ladderJson = File.ReadAllText(ladderFilePath);
-            Console.WriteLine(ladderJson);
-            // Something is wrong here - it complains about ladderJson being invalid json?
             var ladder = JsonSerializer.Deserialize<LadderStats>(ladderJson, options);
             foreach (var ranker in ladder!.Rankers!)
             {

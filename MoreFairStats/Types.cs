@@ -22,6 +22,7 @@ public class RoundAppearance
 
 public class NewRoundStats
 {
+    public string? id { get; set; }
     public List<string>? RoundTypes { get; set; }
     public string? BasePointsToPromote { get; set; }
     public string? CreatedOn { get; set; }
@@ -32,6 +33,7 @@ public class NewRoundStats
 
 public class LadderStats
 {
+    public string? id { get; set; }
     public List<Ranker>? Rankers { get; set; }
     public string? CreatedOn { get; set; }
     public string? BasePointsToPromote { get; set; }
