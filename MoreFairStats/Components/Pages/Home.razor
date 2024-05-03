@@ -80,7 +80,7 @@
     protected override async Task OnInitializedAsync()
     {
         parseStatsConfig();
-        //await getRoundStats(currentMaxRound);
+        await getRoundStats(currentMaxRound);
         RoundNumber = currentMaxRound;
         //UpdatePlayersWithNewNames();
         //invertRoundsToPlayers();
@@ -137,7 +137,8 @@
             CreatedOn = roundData.CreatedOn,
             Number = roundData.Number,
             NumberOfLadders = roundData.Ladders!.Count,
-            RoundTypes = roundData.RoundTypes
+            RoundTypes = roundData.RoundTypes,
+            id = roundData.Number.ToString()
         };
         var newRoundStatsString = JsonSerializer.Serialize(newRoundStats);
         var dataDirectory = Environment.CurrentDirectory + "\\Data";
@@ -146,8 +147,9 @@
         foreach (var ladder in roundData.Ladders)
         {
             var ladderStats = ladder.Value;
-            ladderStats.Round = roundData.Number;
+            ladderStats.Round = round;
             ladderStats.Ladder = int.Parse(ladder.Key);
+            ladderStats.id = $"R{round}L{ladder.Key}";
             var ladderStatsString = JsonSerializer.Serialize(ladderStats);
             var ladderStatsPath = dataDirectory + $"\\Ladders\\R{round}L{ladder.Key}.json";
             File.WriteAllText(ladderStatsPath, ladderStatsString);

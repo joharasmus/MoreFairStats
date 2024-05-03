@@ -26,22 +26,6 @@ async void UploadLaddersToAzure()
     }
 }
 
-void WriteRoundIdToFiles()
-{
-    var dirInfo = new DirectoryInfo("C:\\Users\\admin\\source\\repos\\MoreFairStats\\MoreFairStats\\Data\\Rounds\\");
-    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-    foreach (var roundFiles in dirInfo.GetFiles())
-    {
-        var roundFilePath = roundFiles.FullName;
-        var roundJson = File.ReadAllText(roundFilePath);
-        var round = JsonSerializer.Deserialize<NewRoundStats>(roundJson, options);
-        round!.id = round.Number.ToString();
-        Console.WriteLine(round!.Number);
-        var jsonString = JsonSerializer.Serialize(round);
-        File.WriteAllText(roundFilePath, jsonString);
-    }
-}
-
 async void UploadRoundsToAzure()
 {
     var mfsLadders = cosmosDB.GetContainer("mfs-rounds");
@@ -62,7 +46,6 @@ async void UploadRoundsToAzure()
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-//WriteRoundIdToFiles();
 //UploadLaddersToAzure();
 //UploadRoundsToAzure();
 
