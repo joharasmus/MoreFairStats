@@ -1,6 +1,10 @@
 ﻿namespace MoreFairStats;
 
-
+public class Config
+{
+    public int id { get; set; }
+    public int CurrentMaxRound { get; set; }
+}
 public class RoundAppearance
 {
     public Dictionary<string, LadderAppearance>? Ladders { get; set; }
@@ -71,9 +75,4 @@ public class PlayerStats
     public string? UserName { get; set; }
     public int AHPoints { get; set; }
     public List<RoundAppearance> RoundAppearances { get; set; } = [];
-}
-
-public class Config
-{
-    public int CurrentMaxRound { get; set; }
 }

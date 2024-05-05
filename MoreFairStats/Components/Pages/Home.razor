@@ -4,7 +4,6 @@
 @using Microsoft.Azure.Cosmos
 @using MoreFairStats.Components
 @inject Database dataBase
-@inject IConfiguration Configuration
 
 <PageTitle>Home</PageTitle>
 
@@ -58,7 +57,7 @@
 
 
 @code{
-    private int currentMaxRound => int.Parse(Configuration["currentMaxRound"]!);
+    private int currentMaxRound { get; set; }
 
     private int _roundNumber;
 
@@ -79,6 +78,11 @@
 
     protected override void OnInitialized()
     {
+        var mfsConfigContainer = dataBase.GetContainer("mfs-config");
+        var asyncMfsConfig = mfsConfigContainer.ReadItemAsync<Config>("1", new PartitionKey("1"));
+        asyncMfsConfig.Wait();
+        var mfsConfig = asyncMfsConfig.Result.Resource;
+        currentMaxRound = mfsConfig.CurrentMaxRound;
         RoundNumber = currentMaxRound;
     }
 

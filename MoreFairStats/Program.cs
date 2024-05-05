@@ -8,13 +8,6 @@ var cosmosDbConnString = builder.Configuration["cosmosDbConnstring"];
 var cosmosClient = new CosmosClient(cosmosDbConnString);
 var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
 
-var azureAppCfgConnString = builder.Configuration["mfsAppConfigConnStr"];
-builder.Configuration.AddAzureAppConfiguration(options => 
-    options.Connect(azureAppCfgConnString)
-    .Select("currentMaxRound")
-    .ConfigureRefresh(refreshOptions => refreshOptions.Register("currentMaxRound", true)));
-builder.Services.AddAzureAppConfiguration();
-
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -30,8 +23,6 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-app.UseAzureAppConfiguration();
 
 app.UseHttpsRedirection();
 

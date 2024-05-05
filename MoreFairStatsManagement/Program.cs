@@ -6,13 +6,17 @@ using Microsoft.Extensions.Configuration;
 using MoreFairStatsManagement;
 
 
-var firstConfig = new ConfigurationBuilder().AddUserSecrets<Program>().Build();  //This gets the local secrets
-var finalConfig = new ConfigurationBuilder().AddUserSecrets<Program>().AddAzureAppConfiguration(firstConfig["mfsAppConfigConnStr"]).Build(); // This gets app config values from azure
+var programConfig = new ConfigurationBuilder().AddUserSecrets<Program>().Build();  //This gets the local secrets
 
-var dbConnStr = finalConfig["mfsCosmosDbConnStr"];
+var dbConnStr = programConfig["mfsCosmosDbConnStr"];
 var cosmosClient = new CosmosClient(dbConnStr);
 var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
-var currentMaxLadder = int.Parse(finalConfig["currentMaxRound"]!);
+var mfsConfigContainer = cosmosDB.GetContainer("mfs-config");
+var asyncMfsConfig = mfsConfigContainer.ReadItemAsync<Config>("1", new PartitionKey("1"));
+asyncMfsConfig.Wait();
+var mfsConfig = asyncMfsConfig.Result.Resource;
+var currentMaxRound = mfsConfig.CurrentMaxRound;
+Console.WriteLine(currentMaxRound);
 
 LadderStats parseLadderStats(int round, int ladder)
 {
@@ -69,10 +73,10 @@ void getRoundStats(int round)
 
 void UpdatePlayersWithNewNames()
 {
-    var firstLadder = parseLadderStats(currentMaxLadder + 1, 1);
+    var firstLadder = parseLadderStats(currentMaxRound + 1, 1);
     var firstLadderRankers = firstLadder.Rankers;
     Console.WriteLine(firstLadderRankers!.Count);
-    var queryString = "SELECT * FROM c WHERE c.Round != 260";
+    var queryString = $"SELECT * FROM c WHERE c.Round != {currentMaxRound + 1}";
     var queryDef = new QueryDefinition(queryString);
     var mfsLadders = cosmosDB.GetContainer("mfs-ladders");
     using var queryIter = mfsLadders.GetItemQueryIterator<LadderStats>(queryDef);
@@ -102,6 +106,12 @@ void UpdatePlayersWithNewNames()
             Console.WriteLine(upsertedLadder.Resource.id);
         }
     }
+}
+
+void UpdateNewRound()
+{
+    getRoundStats(currentMaxRound + 1);
+    UpdatePlayersWithNewNames();
 }
 
 // private void invertRoundsToPlayers()
@@ -168,6 +178,4 @@ void UpdatePlayersWithNewNames()
 //     File.WriteAllText(filePath, jsonString);
 // }
 
-//getRoundStats(currentMaxLadder + 1);
-//UpdatePlayersWithNewNames();
-//invertRoundsToPlayers()
+//UpdateNewRound();
