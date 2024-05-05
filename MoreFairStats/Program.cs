@@ -10,8 +10,6 @@ var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
 
 var azureAppCfgConnString = builder.Configuration["mfsAppConfigConnStr"];
 builder.Configuration.AddAzureAppConfiguration(azureAppCfgConnString);
-var currentMaxLadder = builder.Configuration["currentMaxRound"];
-Console.WriteLine(currentMaxLadder);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

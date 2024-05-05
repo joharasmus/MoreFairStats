@@ -76,10 +76,10 @@
 </table>
 
 @code {
-    private NewRoundStats? _roundStats;
+    private RoundStats? _roundStats;
 
     [Parameter]
-    public NewRoundStats? roundStats { get; set; }
+    public RoundStats? roundStats { get; set; }
 
     public int maxLadder => roundStats!.NumberOfLadders;
 

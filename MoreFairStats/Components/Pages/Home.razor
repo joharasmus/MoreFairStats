@@ -50,7 +50,10 @@
     </div>
     <br>
 
-    <RankersTable roundStats="@roundStats" ladderStats="@ladderStats" OnLadderClickCallback="@updateLadderNumber" ></RankersTable>
+    @if(ladderStats != null)
+    {
+        <RankersTable roundStats="@roundStats" ladderStats="@ladderStats" OnLadderClickCallback="@updateLadderNumber" ></RankersTable>
+    }
 }
 
 
@@ -69,9 +72,7 @@
         }
     }
 
-    private NewRoundStats? roundStats;
-
-    private RoundStats? oldRoundStats;
+    private RoundStats? roundStats;
 
     private LadderStats? ladderStats;
 
@@ -83,31 +84,35 @@
         RoundNumber = currentMaxRound;
     }
 
-    private async void updateRoundNumber()
+    private void updateRoundNumber()
     {
-        await parseRoundStats(RoundNumber);
-        ladderStats = await parseLadderStats(RoundNumber, roundStats!.NumberOfLadders); //Always use the last ladder, which has the same number as the count
+        parseRoundStats(RoundNumber);
+        ladderStats = parseLadderStats(RoundNumber, roundStats!.NumberOfLadders); //Always use the last ladder, which has the same number as the count
         StateHasChanged();
     }
 
-    private async void updateLadderNumber(string ladderNum)
+    private void updateLadderNumber(string ladderNum)
     {
         var intLadderNum = Int32.Parse(ladderNum);
-        ladderStats = await parseLadderStats(RoundNumber, intLadderNum);
+        ladderStats = parseLadderStats(RoundNumber, intLadderNum);
         StateHasChanged();
     }
 
-    private async Task parseRoundStats(int round)
+    private void parseRoundStats(int round)
     {
         var container = dataBase.GetContainer("mfs-rounds");
-        var respItem = await container.ReadItemAsync<NewRoundStats>(round.ToString(), new PartitionKey(round));
+        var asyncResp = container.ReadItemAsync<RoundStats>(round.ToString(), new PartitionKey(round));
+        asyncResp.Wait();
+        var respItem = asyncResp.Result;
         roundStats = respItem.Resource;
     }
 
-    private async Task<LadderStats> parseLadderStats(int round, int ladder)
+    private LadderStats parseLadderStats(int round, int ladder)
     {
         var container = dataBase.GetContainer("mfs-ladders");
-        var respItem = await container.ReadItemAsync<LadderStats>($"R{round}L{ladder}", new PartitionKey(round));
+        var asyncResp =container.ReadItemAsync<LadderStats>($"R{round}L{ladder}", new PartitionKey(round));
+        asyncResp.Wait();
+        var respItem = asyncResp.Result;
         return respItem.Resource;
     }
 }

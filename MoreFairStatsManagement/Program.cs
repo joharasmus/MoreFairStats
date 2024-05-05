@@ -3,6 +3,7 @@ using Microsoft.Azure.Cosmos;
 using MoreFairStats;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using MoreFairStatsManagement;
 
 Console.WriteLine("Hello, World!");
 
@@ -13,6 +14,7 @@ var dbConnStr = finalConfig["mfsCosmosDbConnStr"];
 Console.WriteLine(dbConnStr);
 var cosmosClient = new CosmosClient(dbConnStr);
 var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
+var currentMaxLadder = int.Parse(finalConfig["currentMaxRound"]!);
 
 async void UploadLaddersToAzure()
 {
@@ -38,7 +40,7 @@ async void UploadRoundsToAzure()
     foreach (var file in dirInfo.GetFiles())
     {
         var roundJson = File.ReadAllText(file.FullName);
-        var roundStats = JsonSerializer.Deserialize<NewRoundStats>(roundJson);
+        var roundStats = JsonSerializer.Deserialize<MoreFairStats.RoundStats>(roundJson);
         var partitionKey = new PartitionKey(roundStats!.Number);
         var createdItem = await mfsLadders.CreateItemAsync(roundStats, partitionKey);
         Console.WriteLine(createdItem.StatusCode);
@@ -59,8 +61,8 @@ async Task getRoundStats(int round)
     var response = await client.GetAsync($"https://fair.kaliburg.de/api/stats/round/raw?number={round}");
     var bodyString = await response.Content.ReadAsStringAsync();
     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-    var roundData = JsonSerializer.Deserialize<RoundStats>(bodyString, options);
-    var newRoundStats = new NewRoundStats()
+    var roundData = JsonSerializer.Deserialize<APIRoundStats>(bodyString, options);
+    var newRoundStats = new RoundStats()
     {
         BasePointsToPromote = roundData!.BasePointsToPromote,
         ClosedOn = roundData.ClosedOn,

@@ -1,14 +1,5 @@
 ﻿namespace MoreFairStats;
 
-public class RoundStats
-{
-    public Dictionary<string, LadderStats>? Ladders { get; set; }
-    public List<string>? RoundTypes { get; set; }
-    public string? BasePointsToPromote { get; set; }
-    public string? CreatedOn { get; set; }
-    public string? ClosedOn { get; set; }
-    public int Number { get; set; }
-}
 
 public class RoundAppearance
 {
@@ -20,7 +11,7 @@ public class RoundAppearance
     public int Number { get; set; }
 }
 
-public class NewRoundStats
+public class RoundStats
 {
     public string? id { get; set; }
     public List<string>? RoundTypes { get; set; }
