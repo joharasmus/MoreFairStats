@@ -10,9 +10,9 @@
 <form @onsubmit="() => { return; }">
     <div class="input-group" style="width:25rem;">
         <span class="input-group-text border-warning" style="background-color:#10141f; color:#e7d5b3">View stats for round number</span>
-        <input type="number" class="form-control border-warning" value="@RoundNumber" @oninput="(async (e) => await SetRoundNumber(int.Parse((string)e.Value!)))"/>
-        <button type="button" class="btn btn-outline-warning" @onclick="(async () => await SetRoundNumber(RoundNumber - 1))">&#8722;</button>
-        <button type="button" class="btn btn-outline-warning" @onclick="(async () => await SetRoundNumber(RoundNumber + 1))">&#43;</button>
+        <input type="number" class="form-control border-warning" @bind:get="RoundNumber" @bind:set="SetRoundNumber" @bind:event="oninput" />
+        <button type="button" class="btn btn-outline-warning" @onclick="(() => SetRoundNumber(RoundNumber - 1))">&#8722;</button>
+        <button type="button" class="btn btn-outline-warning" @onclick="(() => SetRoundNumber(RoundNumber + 1))">&#43;</button>
     </div>
 </form>
 <br>
@@ -70,7 +70,7 @@
     }
     private async Task SetRoundNumber(int newRoundNumber)
     {
-        var currentMaxRound = await getCurrentMaxRound();
+        var currentMaxRound = await getCurrentMaxRound();;
         _roundNumber = newRoundNumber < 1 ? 1 : (newRoundNumber > currentMaxRound ? currentMaxRound : newRoundNumber);
         await updateRoundNumber();
     }
