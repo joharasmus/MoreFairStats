@@ -5,13 +5,11 @@ using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using MoreFairStatsManagement;
 
-Console.WriteLine("Hello, World!");
 
 var firstConfig = new ConfigurationBuilder().AddUserSecrets<Program>().Build();  //This gets the local secrets
 var finalConfig = new ConfigurationBuilder().AddUserSecrets<Program>().AddAzureAppConfiguration(firstConfig["mfsAppConfigConnStr"]).Build(); // This gets app config values from azure
 
 var dbConnStr = finalConfig["mfsCosmosDbConnStr"];
-Console.WriteLine(dbConnStr);
 var cosmosClient = new CosmosClient(dbConnStr);
 var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
 var currentMaxLadder = int.Parse(finalConfig["currentMaxRound"]!);
@@ -36,7 +34,7 @@ void getRoundStats(int round)
     var bodyString = asyncBodyString.Result;
     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     var roundData = JsonSerializer.Deserialize<APIRoundStats>(bodyString, options);
-    var newRoundStats = new RoundStats()
+    var dbRoundStats = new RoundStats()
     {
         BasePointsToPromote = roundData!.BasePointsToPromote,
         ClosedOn = roundData.ClosedOn,
@@ -49,7 +47,7 @@ void getRoundStats(int round)
     var mfsLadders = cosmosDB.GetContainer("mfs-ladders");
     var mfsRounds = cosmosDB.GetContainer("mfs-rounds");
     var partKey = new PartitionKey(round);
-    var asyncCreatedItem = mfsRounds.CreateItemAsync(newRoundStats, partKey);
+    var asyncCreatedItem = mfsRounds.UpsertItemAsync(dbRoundStats, partKey);
     asyncCreatedItem.Wait();
     var createdItem = asyncCreatedItem.Result;
     Console.WriteLine(createdItem.StatusCode);
@@ -61,33 +59,48 @@ void getRoundStats(int round)
         ladderStats.Round = round;
         ladderStats.Ladder = int.Parse(ladder.Key);
         ladderStats.id = $"R{round}L{ladder.Key}";
-        var ladderStatsString = JsonSerializer.Serialize(ladderStats);
-        var ladderStatsPath = dataDirectory + $"\\Ladders\\R{round}L{ladder.Key}.json";
-        File.WriteAllText(ladderStatsPath, ladderStatsString);
+        var asyncUpsertedLadder = mfsLadders.UpsertItemAsync(ladderStats, partKey);  // partkey from round can be reused, since partkey has the round as its value for both ladders and rounds
+        asyncUpsertedLadder.Wait();
+        var upsertedLadder = asyncUpsertedLadder.Result;
+        Console.WriteLine(upsertedLadder.StatusCode);
+        Console.WriteLine(upsertedLadder.Resource.id);
     }
 }
 
 void UpdatePlayersWithNewNames()
 {
-    var firstLadder = parseLadderStats(currentMaxLadder, 1);
+    var firstLadder = parseLadderStats(currentMaxLadder + 1, 1);
     var firstLadderRankers = firstLadder.Rankers;
-    var dirInfo = new DirectoryInfo("C:\\Users\\admin\\source\\repos\\MoreFairStats\\MoreFairStats\\Data\\Ladders\\");
-    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-    foreach (var ladderFile in dirInfo.GetFiles())
+    Console.WriteLine(firstLadderRankers!.Count);
+    var queryString = "SELECT * FROM c WHERE c.Round != 260";
+    var queryDef = new QueryDefinition(queryString);
+    var mfsLadders = cosmosDB.GetContainer("mfs-ladders");
+    using var queryIter = mfsLadders.GetItemQueryIterator<LadderStats>(queryDef);
+    while (queryIter.HasMoreResults)
     {
-        var ladderFilePath = ladderFile.FullName;
-        Console.WriteLine(ladderFilePath);
-        var ladderJson = File.ReadAllText(ladderFilePath);
-        var ladder = JsonSerializer.Deserialize<LadderStats>(ladderJson, options);
-        foreach (var ranker in ladder!.Rankers!)
+        var response = queryIter.ReadNextAsync(); // Everything in the first result
+        response.Wait();
+        var result = response.Result;
+        foreach (var ladder in result)
         {
-            var matchRanker = firstLadderRankers!.Find(r => r.AccountId == ranker.AccountId);
-            if (matchRanker == null) continue;
-            ranker.UserName = matchRanker.UserName;
-            ranker.AssholePoints = matchRanker.AssholePoints;
+            Console.WriteLine(ladder.id);
+            var ladderRankers = ladder.Rankers;
+            foreach (var ranker in ladderRankers!)
+            {
+                var matchRanker = firstLadderRankers.Find(r => r.AccountId == ranker.AccountId);
+                if (matchRanker != null)
+                {
+                    ranker.UserName = matchRanker.UserName;
+                    ranker.AssholePoints = matchRanker.AssholePoints;
+                }
+            }
+            var partKey = new PartitionKey(ladder.Round);
+            var asyncUpsertedLadder = mfsLadders.UpsertItemAsync(ladder, partKey);
+            asyncUpsertedLadder.Wait();
+            var upsertedLadder = asyncUpsertedLadder.Result;
+            Console.WriteLine(upsertedLadder.StatusCode);
+            Console.WriteLine(upsertedLadder.Resource.id);
         }
-        var jsonString = JsonSerializer.Serialize(ladder);
-        File.WriteAllText(ladderFilePath, jsonString);
     }
 }
 
@@ -155,6 +168,6 @@ void UpdatePlayersWithNewNames()
 //     File.WriteAllText(filePath, jsonString);
 // }
 
-//await getRoundStats(currentMaxLadder);
+//getRoundStats(currentMaxLadder + 1);
 //UpdatePlayersWithNewNames();
 //invertRoundsToPlayers()
