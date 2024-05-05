@@ -10,9 +10,9 @@
 <form @onsubmit="() => { return; }">
     <div class="input-group" style="width:25rem;">
         <span class="input-group-text border-warning" style="background-color:#10141f; color:#e7d5b3">View stats for round number</span>
-        <input type="number" class="form-control border-warning" @bind="RoundNumber" @bind:event="oninput"/>
-        <button type="button" class="btn btn-outline-warning" @onclick="(() => RoundNumber--)">&#8722;</button>
-        <button type="button" class="btn btn-outline-warning" @onclick="(() => RoundNumber++)">&#43;</button>
+        <input type="number" class="form-control border-warning" value="@RoundNumber" @oninput="(async (e) => await SetRoundNumber(int.Parse((string)e.Value!)))"/>
+        <button type="button" class="btn btn-outline-warning" @onclick="(async () => await SetRoundNumber(RoundNumber - 1))">&#8722;</button>
+        <button type="button" class="btn btn-outline-warning" @onclick="(async () => await SetRoundNumber(RoundNumber + 1))">&#43;</button>
     </div>
 </form>
 <br>
@@ -57,18 +57,22 @@
 
 
 @code{
-    private int currentMaxRound => moreFairData.Config.CurrentMaxRound;
+    private async Task<int> getCurrentMaxRound()
+    {
+        return (await moreFairData.GetConfig()).CurrentMaxRound;
+    }
 
     private int _roundNumber;
 
     private int RoundNumber 
     { 
         get => _roundNumber;
-        set 
-        { 
-            _roundNumber = value < 1 ? 1 : (value > currentMaxRound ? currentMaxRound : value);
-            updateRoundNumber();
-        }
+    }
+    private async Task SetRoundNumber(int newRoundNumber)
+    {
+        var currentMaxRound = await getCurrentMaxRound();
+        _roundNumber = newRoundNumber < 1 ? 1 : (newRoundNumber > currentMaxRound ? currentMaxRound : newRoundNumber);
+        await updateRoundNumber();
     }
 
     private RoundStats? roundStats;
@@ -76,30 +80,31 @@
     private LadderStats? ladderStats;
 
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        RoundNumber = currentMaxRound;
+        var currentMaxRound = await getCurrentMaxRound();
+        await SetRoundNumber(currentMaxRound);
     }
 
-    private void updateRoundNumber()
+    private async Task updateRoundNumber()
     {
-        parseRoundStats(RoundNumber);
-        ladderStats = parseLadderStats(RoundNumber, roundStats!.NumberOfLadders); //Always use the last ladder, which has the same number as the count
+        await parseRoundStats(RoundNumber);
+        ladderStats = await parseLadderStats(RoundNumber, roundStats!.NumberOfLadders); //Always use the last ladder, which has the same number as the count
         StateHasChanged();
     }
 
-    private void updateLadderNumber(string ladderNum)
+    private async Task updateLadderNumber(string ladderNum)
     {
         var intLadderNum = Int32.Parse(ladderNum);
-        ladderStats = parseLadderStats(RoundNumber, intLadderNum);
+        ladderStats = await parseLadderStats(RoundNumber, intLadderNum);
         StateHasChanged();
     }
 
-    private void parseRoundStats(int round)
+    private async Task parseRoundStats(int round)
     {
-        roundStats = moreFairData.GetRound(round);
+        roundStats = await moreFairData.GetRound(round);
     }
 
-    private LadderStats parseLadderStats(int round, int ladder)
-        => moreFairData.GetLadder(round, ladder);
+    private async Task<LadderStats> parseLadderStats(int round, int ladder)
+        => await moreFairData.GetLadder(round, ladder);
 }
