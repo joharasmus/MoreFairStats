@@ -6,12 +6,13 @@ using Microsoft.Extensions.Configuration;
 
 Console.WriteLine("Hello, World!");
 
-var config = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
+var firstConfig = new ConfigurationBuilder().AddUserSecrets<Program>().Build();  //This gets the local secrets
+var finalConfig = new ConfigurationBuilder().AddUserSecrets<Program>().AddAzureAppConfiguration(firstConfig["mfsAppConfigConnStr"]).Build(); // This gets app config values from azure
 
-var connString = config["mfsCosmosDbConnStr"];
-var cosmosClient = new CosmosClient(connString);
+var dbConnStr = finalConfig["mfsCosmosDbConnStr"];
+Console.WriteLine(dbConnStr);
+var cosmosClient = new CosmosClient(dbConnStr);
 var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
-var currentMaxLadder = 260;
 
 async void UploadLaddersToAzure()
 {

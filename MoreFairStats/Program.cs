@@ -4,9 +4,14 @@ using MoreFairStats.Components;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
 
-var connString = builder.Configuration["cosmosDbConnstring"];
-var cosmosClient = new CosmosClient(connString);
+var cosmosDbConnString = builder.Configuration["cosmosDbConnstring"];
+var cosmosClient = new CosmosClient(cosmosDbConnString);
 var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
+
+var azureAppCfgConnString = builder.Configuration["mfsAppConfigConnStr"];
+builder.Configuration.AddAzureAppConfiguration(azureAppCfgConnString);
+var currentMaxLadder = builder.Configuration["currentMaxRound"];
+Console.WriteLine(currentMaxLadder);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
