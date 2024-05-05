@@ -3,7 +3,7 @@
 @using Azure.Identity
 @using Microsoft.Azure.Cosmos
 @using MoreFairStats.Components
-@inject Database dataBase
+@inject MoreFairData moreFairData
 
 <PageTitle>Home</PageTitle>
 
@@ -57,7 +57,7 @@
 
 
 @code{
-    private int currentMaxRound { get; set; }
+    private int currentMaxRound => moreFairData.Config.CurrentMaxRound;
 
     private int _roundNumber;
 
@@ -78,11 +78,6 @@
 
     protected override void OnInitialized()
     {
-        var mfsConfigContainer = dataBase.GetContainer("mfs-config");
-        var asyncMfsConfig = mfsConfigContainer.ReadItemAsync<Config>("1", new PartitionKey("1"));
-        asyncMfsConfig.Wait();
-        var mfsConfig = asyncMfsConfig.Result.Resource;
-        currentMaxRound = mfsConfig.CurrentMaxRound;
         RoundNumber = currentMaxRound;
     }
 
@@ -102,19 +97,9 @@
 
     private void parseRoundStats(int round)
     {
-        var container = dataBase.GetContainer("mfs-rounds");
-        var asyncResp = container.ReadItemAsync<RoundStats>(round.ToString(), new PartitionKey(round));
-        asyncResp.Wait();
-        var respItem = asyncResp.Result;
-        roundStats = respItem.Resource;
+        roundStats = moreFairData.GetRound(round);
     }
 
     private LadderStats parseLadderStats(int round, int ladder)
-    {
-        var container = dataBase.GetContainer("mfs-ladders");
-        var asyncResp = container.ReadItemAsync<LadderStats>($"R{round}L{ladder}", new PartitionKey(round));
-        asyncResp.Wait();
-        var respItem = asyncResp.Result;
-        return respItem.Resource;
-    }
+        => moreFairData.GetLadder(round, ladder);
 }

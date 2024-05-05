@@ -1,18 +1,17 @@
-using Microsoft.Azure.Cosmos;
+using MoreFairStats;
 using MoreFairStats.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
 
-var cosmosDbConnString = builder.Configuration["cosmosDbConnstring"];
-var cosmosClient = new CosmosClient(cosmosDbConnString);
-var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
+var cosmosDbConnString = builder.Configuration["cosmosDbConnstring"]!;
+var moreFairData = new MoreFairData(cosmosDbConnString);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddSingleton(cosmosDB);
+builder.Services.AddSingleton(moreFairData);
 
 var app = builder.Build();
 

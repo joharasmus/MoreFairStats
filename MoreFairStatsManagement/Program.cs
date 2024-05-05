@@ -8,39 +8,22 @@ using MoreFairStatsManagement;
 
 var programConfig = new ConfigurationBuilder().AddUserSecrets<Program>().Build();  //This gets the local secrets
 
-var dbConnStr = programConfig["mfsCosmosDbConnStr"];
-var cosmosClient = new CosmosClient(dbConnStr);
-var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
-var mfsConfigContainer = cosmosDB.GetContainer("mfs-config");
-var asyncMfsConfig = mfsConfigContainer.ReadItemAsync<Config>("1", new PartitionKey("1"));
-asyncMfsConfig.Wait();
-var mfsConfig = asyncMfsConfig.Result.Resource;
+var dbConnStr = programConfig["mfsCosmosDbConnStr"]!;
+var moreFairData = new MoreFairData(dbConnStr);
+
+var mfsConfig = moreFairData.Config;
 var currentMaxRound = mfsConfig.CurrentMaxRound;
 Console.WriteLine(currentMaxRound);
 
-LadderStats parseLadderStats(int round, int ladder)
+void updateWithNewRoundStats(int round)
 {
-    var container = cosmosDB.GetContainer("mfs-ladders");
-    var asyncResp = container.ReadItemAsync<LadderStats>($"R{round}L{ladder}", new PartitionKey(round));
-    asyncResp.Wait();
-    var respItem = asyncResp.Result;
-    return respItem.Resource;
-}
-
-void getRoundStats(int round)
-{
-    var client = new HttpClient();
-    var asyncApiResp = client.GetAsync($"https://fair.kaliburg.de/api/stats/round/raw?number={round}");
-    asyncApiResp.Wait();
-    var response = asyncApiResp.Result;
-    var asyncBodyString = response.Content.ReadAsStringAsync();
-    asyncBodyString.Wait();
-    var bodyString = asyncBodyString.Result;
-    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-    var roundData = JsonSerializer.Deserialize<APIRoundStats>(bodyString, options);
+    using var client = new HttpClient();
+    using var apiResp = client.Get($"https://fair.kaliburg.de/api/stats/round/raw?number={round}");
+    var bodyString = apiResp.Content.ReadAsString();
+    var roundData = bodyString.Deserialize<APIRoundStats>();
     var dbRoundStats = new RoundStats()
     {
-        BasePointsToPromote = roundData!.BasePointsToPromote,
+        BasePointsToPromote = roundData.BasePointsToPromote,
         ClosedOn = roundData.ClosedOn,
         CreatedOn = roundData.CreatedOn,
         Number = roundData.Number,
@@ -48,48 +31,32 @@ void getRoundStats(int round)
         RoundTypes = roundData.RoundTypes,
         id = roundData.Number.ToString()
     };
-    var mfsLadders = cosmosDB.GetContainer("mfs-ladders");
-    var mfsRounds = cosmosDB.GetContainer("mfs-rounds");
-    var partKey = new PartitionKey(round);
-    var asyncCreatedItem = mfsRounds.UpsertItemAsync(dbRoundStats, partKey);
-    asyncCreatedItem.Wait();
-    var createdItem = asyncCreatedItem.Result;
-    Console.WriteLine(createdItem.StatusCode);
-    Console.WriteLine(createdItem.Resource.id);
-    var dataDirectory = Environment.CurrentDirectory + "\\Data";
+    moreFairData.Upsert(dbRoundStats);
     foreach (var ladder in roundData.Ladders)
     {
         var ladderStats = ladder.Value;
         ladderStats.Round = round;
         ladderStats.Ladder = int.Parse(ladder.Key);
         ladderStats.id = $"R{round}L{ladder.Key}";
-        var asyncUpsertedLadder = mfsLadders.UpsertItemAsync(ladderStats, partKey);  // partkey from round can be reused, since partkey has the round as its value for both ladders and rounds
-        asyncUpsertedLadder.Wait();
-        var upsertedLadder = asyncUpsertedLadder.Result;
-        Console.WriteLine(upsertedLadder.StatusCode);
-        Console.WriteLine(upsertedLadder.Resource.id);
+        moreFairData.Upsert(ladderStats);
     }
 }
 
 void UpdatePlayersWithNewNames()
 {
-    var firstLadder = parseLadderStats(currentMaxRound + 1, 1);
-    var firstLadderRankers = firstLadder.Rankers;
-    Console.WriteLine(firstLadderRankers!.Count);
+    var firstLadder = moreFairData.GetLadder(currentMaxRound + 1, 1);
+    var firstLadderRankers = firstLadder.Rankers!;
     var queryString = $"SELECT * FROM c WHERE c.Round != {currentMaxRound + 1}";
     var queryDef = new QueryDefinition(queryString);
-    var mfsLadders = cosmosDB.GetContainer("mfs-ladders");
-    using var queryIter = mfsLadders.GetItemQueryIterator<LadderStats>(queryDef);
+    using var queryIter = moreFairData.GetLadderQueryIterator(queryDef);
     while (queryIter.HasMoreResults)
     {
-        var response = queryIter.ReadNextAsync(); // Everything in the first result
-        response.Wait();
-        var result = response.Result;
+        var result = queryIter.ReadNext();
         foreach (var ladder in result)
         {
             Console.WriteLine(ladder.id);
-            var ladderRankers = ladder.Rankers;
-            foreach (var ranker in ladderRankers!)
+            var ladderRankers = ladder.Rankers!;
+            foreach (var ranker in ladderRankers)
             {
                 var matchRanker = firstLadderRankers.Find(r => r.AccountId == ranker.AccountId);
                 if (matchRanker != null)
@@ -98,19 +65,14 @@ void UpdatePlayersWithNewNames()
                     ranker.AssholePoints = matchRanker.AssholePoints;
                 }
             }
-            var partKey = new PartitionKey(ladder.Round);
-            var asyncUpsertedLadder = mfsLadders.UpsertItemAsync(ladder, partKey);
-            asyncUpsertedLadder.Wait();
-            var upsertedLadder = asyncUpsertedLadder.Result;
-            Console.WriteLine(upsertedLadder.StatusCode);
-            Console.WriteLine(upsertedLadder.Resource.id);
+            moreFairData.Upsert(ladder);
         }
     }
 }
 
 void UpdateNewRound()
 {
-    getRoundStats(currentMaxRound + 1);
+    updateWithNewRoundStats(currentMaxRound + 1);
     UpdatePlayersWithNewNames();
 }
 

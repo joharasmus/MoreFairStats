@@ -1,4 +1,6 @@
-﻿namespace MoreFairStats;
+﻿using Microsoft.Azure.Cosmos;
+
+namespace MoreFairStats;
 
 public class Config
 {
@@ -75,4 +77,37 @@ public class PlayerStats
     public string? UserName { get; set; }
     public int AHPoints { get; set; }
     public List<RoundAppearance> RoundAppearances { get; set; } = [];
+}
+
+public class MoreFairData
+{
+    private Container LadderDb { get; init; }
+    private Container RoundDb { get; init; }
+    private Container ConfigDb { get; init; }
+
+    public MoreFairData(string connectionString)
+    {
+        var cosmosClient = new CosmosClient(connectionString);
+        var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
+
+        LadderDb = cosmosDB.GetContainer("mfs-ladders");
+        RoundDb = cosmosDB.GetContainer("mfs-rounds");
+        ConfigDb = cosmosDB.GetContainer("mfs-config");
+    }
+    public Config Config
+        => ConfigDb.ReadItem<Config>("1", "1");
+
+    public LadderStats GetLadder(int round, int ladder)
+        => LadderDb.ReadItem<LadderStats>($"R{round}L{ladder}", round);
+    public RoundStats GetRound(int round)
+        => RoundDb.ReadItem<RoundStats>(round.ToString(), round);
+
+    public void Upsert(LadderStats ladderStats)
+        => LadderDb.UpsertItem(ladderStats, ladderStats.Round);
+
+    public void Upsert(RoundStats roundStats)
+    => LadderDb.UpsertItem(roundStats, roundStats.Number);
+
+    public FeedIterator<LadderStats> GetLadderQueryIterator(QueryDefinition queryDefinition)
+        => LadderDb.GetItemQueryIterator<LadderStats>(queryDefinition);
 }
