@@ -76,8 +76,6 @@
 
     private LadderStats? ladderStats;
 
-    private Config? statsConfig;
-
 
     protected override void OnInitialized()
     {
@@ -110,7 +108,7 @@
     private LadderStats parseLadderStats(int round, int ladder)
     {
         var container = dataBase.GetContainer("mfs-ladders");
-        var asyncResp =container.ReadItemAsync<LadderStats>($"R{round}L{ladder}", new PartitionKey(round));
+        var asyncResp = container.ReadItemAsync<LadderStats>($"R{round}L{ladder}", new PartitionKey(round));
         asyncResp.Wait();
         var respItem = asyncResp.Result;
         return respItem.Resource;

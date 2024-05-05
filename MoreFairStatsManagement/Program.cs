@@ -16,50 +16,24 @@ var cosmosClient = new CosmosClient(dbConnStr);
 var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
 var currentMaxLadder = int.Parse(finalConfig["currentMaxRound"]!);
 
-async void UploadLaddersToAzure()
-{
-    var mfsLadders = cosmosDB.GetContainer("mfs-ladders");
-    var laddersDir = Environment.CurrentDirectory + "\\Data\\Ladders";
-    var dirInfo = new DirectoryInfo(laddersDir);
-    foreach (var file in dirInfo.GetFiles())
-    {
-        var ladderjson = File.ReadAllText(file.FullName);
-        var ladderStats = JsonSerializer.Deserialize<LadderStats>(ladderjson);
-        var partitionKey = new PartitionKey(ladderStats!.Round);
-        var createdItem = await mfsLadders.CreateItemAsync(ladderStats, partitionKey);
-        Console.WriteLine(createdItem.StatusCode);
-        Console.WriteLine(createdItem.Resource.id);
-    }
-}
-
-async void UploadRoundsToAzure()
-{
-    var mfsLadders = cosmosDB.GetContainer("mfs-rounds");
-    var roundsDir = Environment.CurrentDirectory + "\\Data\\Rounds";
-    var dirInfo = new DirectoryInfo(roundsDir);
-    foreach (var file in dirInfo.GetFiles())
-    {
-        var roundJson = File.ReadAllText(file.FullName);
-        var roundStats = JsonSerializer.Deserialize<MoreFairStats.RoundStats>(roundJson);
-        var partitionKey = new PartitionKey(roundStats!.Number);
-        var createdItem = await mfsLadders.CreateItemAsync(roundStats, partitionKey);
-        Console.WriteLine(createdItem.StatusCode);
-        //Console.WriteLine(createdItem.Resource.id);
-    }
-}
-
-async Task<LadderStats> parseLadderStats(int round, int ladder)
+LadderStats parseLadderStats(int round, int ladder)
 {
     var container = cosmosDB.GetContainer("mfs-ladders");
-    var respItem = await container.ReadItemAsync<LadderStats>($"R{round}L{ladder}", new PartitionKey(round));
+    var asyncResp = container.ReadItemAsync<LadderStats>($"R{round}L{ladder}", new PartitionKey(round));
+    asyncResp.Wait();
+    var respItem = asyncResp.Result;
     return respItem.Resource;
 }
 
-async Task getRoundStats(int round)
+void getRoundStats(int round)
 {
     var client = new HttpClient();
-    var response = await client.GetAsync($"https://fair.kaliburg.de/api/stats/round/raw?number={round}");
-    var bodyString = await response.Content.ReadAsStringAsync();
+    var asyncApiResp = client.GetAsync($"https://fair.kaliburg.de/api/stats/round/raw?number={round}");
+    asyncApiResp.Wait();
+    var response = asyncApiResp.Result;
+    var asyncBodyString = response.Content.ReadAsStringAsync();
+    asyncBodyString.Wait();
+    var bodyString = asyncBodyString.Result;
     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     var roundData = JsonSerializer.Deserialize<APIRoundStats>(bodyString, options);
     var newRoundStats = new RoundStats()
@@ -75,7 +49,9 @@ async Task getRoundStats(int round)
     var mfsLadders = cosmosDB.GetContainer("mfs-ladders");
     var mfsRounds = cosmosDB.GetContainer("mfs-rounds");
     var partKey = new PartitionKey(round);
-    var createdItem = await mfsRounds.CreateItemAsync(newRoundStats, partKey);
+    var asyncCreatedItem = mfsRounds.CreateItemAsync(newRoundStats, partKey);
+    asyncCreatedItem.Wait();
+    var createdItem = asyncCreatedItem.Result;
     Console.WriteLine(createdItem.StatusCode);
     Console.WriteLine(createdItem.Resource.id);
     var dataDirectory = Environment.CurrentDirectory + "\\Data";
@@ -91,9 +67,9 @@ async Task getRoundStats(int round)
     }
 }
 
-async void UpdatePlayersWithNewNames()
+void UpdatePlayersWithNewNames()
 {
-    var firstLadder = await parseLadderStats(currentMaxLadder, 1);
+    var firstLadder = parseLadderStats(currentMaxLadder, 1);
     var firstLadderRankers = firstLadder.Rankers;
     var dirInfo = new DirectoryInfo("C:\\Users\\admin\\source\\repos\\MoreFairStats\\MoreFairStats\\Data\\Ladders\\");
     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
