@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.Cosmos;
 
 namespace MoreFairStats;
 
@@ -90,12 +91,11 @@ public class LadderRanker
     public bool Growing { get; set; }
 }
 
-public class PlayerStats
+public class Player
 {
-    public int AccountId { get; set; }
+    public string? id { get; set; }
     public string? UserName { get; set; }
     public int AHPoints { get; set; }
-    public List<RoundAppearance> RoundAppearances { get; set; } = [];
 }
 
 public class MoreFairData
@@ -104,6 +104,10 @@ public class MoreFairData
     private Container RoundDb { get; init; }
     private Container ConfigDb { get; init; }
     private Container RankersDb { get; init; }
+    private Container PlayersDb { get; init; }
+
+    public List<Player> PlayerList { get; init; } = new List<Player>();
+    public Dictionary<int, Player> PlayerDictionary { get; set; } = new Dictionary<int, Player>();
 
     public MoreFairData(string connectionString)
     {
@@ -115,6 +119,7 @@ public class MoreFairData
         RoundDb = cosmosDB.GetContainer("mfs-rounds");
         ConfigDb = cosmosDB.GetContainer("mfs-config");
         RankersDb = cosmosDB.GetContainer("mfs-ladderRankers");
+        PlayersDb = cosmosDB.GetContainer("mfs-players");
     }
 
     public async Task Create(LadderRanker ranker)
@@ -129,6 +134,18 @@ public class MoreFairData
         => await RankersDb.ReadItem<LadderRanker>($"R{round}L{ladder}P{accountId}", round);
     public async Task<RoundStats> GetRound(int round)
         => await RoundDb.ReadItem<RoundStats>(round.ToString(), round);
+    public async Task<Player> GetPlayer(int accountId)
+        => await PlayersDb.ReadItem<Player>(accountId.ToString(), accountId.ToString());
+
+    public async Task<FeedResponse<Player>> GetManyPlayers(IReadOnlyList<string> items)
+    {
+        var itemsWithPartitionKeys = new List<(string, PartitionKey)>();
+        foreach (var item in items)
+        {
+            itemsWithPartitionKeys.Add((item, new PartitionKey(item)));
+        }
+        return await PlayersDb.ReadManyItemsAsync<Player>(itemsWithPartitionKeys);
+    }
 
     public async Task Upsert(LadderStats ladderStats)
         => await LadderDb.UpsertItem(ladderStats, ladderStats.Round);
@@ -139,12 +156,31 @@ public class MoreFairData
     public async Task Upsert(LadderRanker ladderRanker)
         => await RankersDb.UpsertItem(ladderRanker, ladderRanker.Round);
 
+    public async Task Upsert(Player player)
+        => await PlayersDb.UpsertItem(player, player.id);
+
     public async Task PatchLadder(LadderStats ladderStats, IReadOnlyList<PatchOperation> patchOperations)
         => await LadderDb.PatchItem<LadderStats>(ladderStats.id!, ladderStats.Round, patchOperations);
 
     public FeedIterator<LadderStats> GetLadderQueryIterator(QueryDefinition queryDefinition)
-        => LadderDb.GetItemQueryIterator<LadderStats>(queryDefinition);
+        => LadderDb.GetItemQueryIterator<LadderStats>(queryDefinition, requestOptions: new() { MaxItemCount = -1} );
 
     public FeedIterator<LadderRanker> GetLadderRankersQueryIterator(QueryDefinition queryDefinition)
-        => RankersDb.GetItemQueryIterator<LadderRanker>(queryDefinition);
+        => RankersDb.GetItemQueryIterator<LadderRanker>(queryDefinition, requestOptions: new() { MaxItemCount = -1 } );
+
+    public FeedIterator<Player> GetPlayersQueryIterator(QueryDefinition queryDefinition)
+        => PlayersDb.GetItemQueryIterator<Player>(queryDefinition, requestOptions: new () { MaxItemCount = -1} );
+}
+
+public class PlayersRefreshService : IHostedService
+{
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }

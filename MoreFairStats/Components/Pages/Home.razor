@@ -111,29 +111,33 @@
         var queryString = $"SELECT * FROM c WHERE c.Round = {round} AND c.Ladder = {ladder}";
         var queryDef = new QueryDefinition(queryString);
         using var queryIter = moreFairData.GetLadderRankersQueryIterator(queryDef);
-        while (queryIter.HasMoreResults)
+        var allResults = new List<FeedResponse<LadderRanker>>();
+        var result = await queryIter.ReadNextAsync();
+        var allIds = new List<string>();
+        foreach (var ladderRanker in result)
         {
-            var result = await queryIter.ReadNextAsync();
-            foreach (var ladderRanker in result)
+            var ranker = new Ranker()
             {
-                Console.WriteLine(ladderRanker.id);
-                var ranker = new Ranker()
-                {
-                    AccountId = ladderRanker.AccountId,
-                    AssholePoints = ladderRanker.AssholePoints,
-                    AutoPromote = ladderRanker.AutoPromote,
-                    Bias = ladderRanker.Bias,
-                    Grapes = ladderRanker.Grapes,
-                    Growing = ladderRanker.Growing,
-                    Multi = ladderRanker.Multi,
-                    Points = ladderRanker.Points,
-                    Power = ladderRanker.Power,
-                    Rank = ladderRanker.Rank,
-                    UserName = ladderRanker.UserName,
-                    Vinegar = ladderRanker.Vinegar
-                };
-                ladderStats.Rankers!.Add(ranker);
-            }
+                AccountId = ladderRanker.AccountId,
+                AutoPromote = ladderRanker.AutoPromote,
+                Bias = ladderRanker.Bias,
+                Grapes = ladderRanker.Grapes,
+                Growing = ladderRanker.Growing,
+                Multi = ladderRanker.Multi,
+                Points = ladderRanker.Points,
+                Power = ladderRanker.Power,
+                Rank = ladderRanker.Rank,
+                Vinegar = ladderRanker.Vinegar
+            };
+            ladderStats.Rankers!.Add(ranker);
+            allIds.Add(ranker.AccountId.ToString());
+        }
+        var testPlayers = await moreFairData.GetManyPlayers(allIds);
+        foreach (var player in testPlayers)
+        {
+            var ranker = ladderStats.Rankers!.Find(lr => lr.AccountId.ToString() == player.id)!;
+            ranker.AssholePoints = player.AHPoints;
+            ranker.UserName = player.UserName;
         }
         return ladderStats;
     }
