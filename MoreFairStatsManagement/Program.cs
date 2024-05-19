@@ -13,32 +13,14 @@ var moreFairData = new MoreFairData(dbConnStr);
 var mfsConfig = await moreFairData.GetConfig();
 var currentMaxRound = mfsConfig.CurrentMaxRound;
 
-var trialRound = await moreFairData.GetRound(currentMaxRound);
-for(int i = 1; i <= trialRound.NumberOfLadders; i++)
+for (int i = 1; i <= currentMaxRound; i++)
 {
-    var trialLadder = await moreFairData.GetLadder(currentMaxRound, i);
-    Console.WriteLine(trialLadder.id);
-    foreach (var trialRanker in trialLadder.Rankers!)
+    var trialRound = await moreFairData.GetRound(i);
+    Console.WriteLine(trialRound.id);
+    for (int j = 1; j <= trialRound.NumberOfLadders; j++)
     {
-        var ladderRanker = new LadderRanker()
-        {
-            id = $"{trialLadder.id}P{trialRanker.AccountId}",
-            Round = trialLadder.Round,
-            Ladder = trialLadder.Ladder,
-            AccountId = trialRanker.AccountId,
-            UserName = trialRanker.UserName,
-            Rank = trialRanker.Rank,
-            Points = trialRanker.Points,
-            Power = trialRanker.Power,
-            Bias = trialRanker.Bias,
-            Multi = trialRanker.Multi,
-            AssholePoints = trialRanker.AssholePoints,
-            Grapes = trialRanker.Grapes,
-            Vinegar = trialRanker.Vinegar,
-            AutoPromote = trialRanker.AutoPromote,
-            Growing = trialRanker.Growing
-        };
-        await moreFairData.Upsert(ladderRanker);
+        var trialLadder = await moreFairData.GetLadder(i, j);
+        await moreFairData.Upsert(trialLadder);
     }
 }
 
@@ -106,15 +88,13 @@ async Task UpdatePlayersWithNewNames(int roundToQuery)
 
 async Task UpdateNewRound()
 {
-    var latestRoundData = await MoreFairAPI.GetLatest();
+    var latestRoundData = await MoreFairAPI.GetRound(263);
     Console.WriteLine(latestRoundData.BasePointsToPromote);
-    while (currentMaxRound < latestRoundData.Number - 1)  // Iterate until we're 1 away from the last round
-    {
-        throw new NotImplementedException("Iterate until we get to equality (there may have been multiple ladder updates)");
-    }
-    await refreshLadderStatsForRound(latestRoundData);
+    await updateWithNewRoundStats(latestRoundData);
     await UpdatePlayersWithNewNames(latestRoundData.Number);
 }
+
+//await UpdateNewRound();
 
 // private void invertRoundsToPlayers()
 // {
@@ -179,5 +159,3 @@ async Task UpdateNewRound()
 //     var filePath = Environment.CurrentDirectory + $"\\Data\\{fileName}";
 //     File.WriteAllText(filePath, jsonString);
 // }
-
-//UpdateNewRound();

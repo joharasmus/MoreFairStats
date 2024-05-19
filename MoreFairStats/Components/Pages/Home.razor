@@ -106,5 +106,35 @@
     }
 
     private async Task<LadderStats> parseLadderStats(int round, int ladder)
-        => await moreFairData.GetLadder(round, ladder);
+    {
+        var ladderStats = await moreFairData.GetLadder(round, ladder);
+        var queryString = $"SELECT * FROM c WHERE c.Round = {round} AND c.Ladder = {ladder}";
+        var queryDef = new QueryDefinition(queryString);
+        using var queryIter = moreFairData.GetLadderRankersQueryIterator(queryDef);
+        while (queryIter.HasMoreResults)
+        {
+            var result = await queryIter.ReadNextAsync();
+            foreach (var ladderRanker in result)
+            {
+                Console.WriteLine(ladderRanker.id);
+                var ranker = new Ranker()
+                {
+                    AccountId = ladderRanker.AccountId,
+                    AssholePoints = ladderRanker.AssholePoints,
+                    AutoPromote = ladderRanker.AutoPromote,
+                    Bias = ladderRanker.Bias,
+                    Grapes = ladderRanker.Grapes,
+                    Growing = ladderRanker.Growing,
+                    Multi = ladderRanker.Multi,
+                    Points = ladderRanker.Points,
+                    Power = ladderRanker.Power,
+                    Rank = ladderRanker.Rank,
+                    UserName = ladderRanker.UserName,
+                    Vinegar = ladderRanker.Vinegar
+                };
+                ladderStats.Rankers!.Add(ranker);
+            }
+        }
+        return ladderStats;
+    }
 }

@@ -107,7 +107,8 @@ public class MoreFairData
 
     public MoreFairData(string connectionString)
     {
-        var cosmosClient = new CosmosClient(connectionString);
+        var options = new CosmosClientOptions() { EnableContentResponseOnWrite = false, AllowBulkExecution = true };
+        var cosmosClient = new CosmosClient(connectionString, options);
         var cosmosDB = cosmosClient.GetDatabase("mfs-cosmosdb");
 
         LadderDb = cosmosDB.GetContainer("mfs-ladders");
@@ -143,4 +144,7 @@ public class MoreFairData
 
     public FeedIterator<LadderStats> GetLadderQueryIterator(QueryDefinition queryDefinition)
         => LadderDb.GetItemQueryIterator<LadderStats>(queryDefinition);
+
+    public FeedIterator<LadderRanker> GetLadderRankersQueryIterator(QueryDefinition queryDefinition)
+        => RankersDb.GetItemQueryIterator<LadderRanker>(queryDefinition);
 }
