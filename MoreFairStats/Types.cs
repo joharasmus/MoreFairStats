@@ -5,7 +5,7 @@ namespace MoreFairStats;
 
 public class Config
 {
-    public int id { get; set; }
+    public string? id { get; set; }
     public int CurrentMaxRound { get; set; }
 }
 public class RoundAppearance
@@ -70,6 +70,7 @@ public class Ranker
     public string? Vinegar { get; set; }
     public bool AutoPromote { get; set; }
     public bool Growing { get; set; }
+    public int ChampionPoints { get; set; }
 }
 
 public class LadderRanker
@@ -96,6 +97,14 @@ public class Player
     public string? id { get; set; }
     public string? UserName { get; set; }
     public int AHPoints { get; set; }
+}
+
+public class Champion
+{
+    public int AccountId { get; set; }
+    public string? UserName { get; set; }
+    public Dictionary<int, int> ChampionPoints { get; set; } = [];
+    public int ChampionPointsSum => ChampionPoints.Values.Sum();
 }
 
 public class MoreFairData
@@ -157,7 +166,10 @@ public class MoreFairData
         => await RankersDb.UpsertItem(ladderRanker, ladderRanker.Round);
 
     public async Task Upsert(Player player)
-        => await PlayersDb.UpsertItem(player, player.id);
+        => await PlayersDb.UpsertItem(player, player.id!);
+
+    public async Task Upsert(Config config)
+        => await ConfigDb.UpsertItem(config, config.id!);
 
     public async Task PatchLadder(LadderStats ladderStats, IReadOnlyList<PatchOperation> patchOperations)
         => await LadderDb.PatchItem<LadderStats>(ladderStats.id!, ladderStats.Round, patchOperations);
@@ -170,17 +182,4 @@ public class MoreFairData
 
     public FeedIterator<Player> GetPlayersQueryIterator(QueryDefinition queryDefinition)
         => PlayersDb.GetItemQueryIterator<Player>(queryDefinition, requestOptions: new () { MaxItemCount = -1} );
-}
-
-public class PlayersRefreshService : IHostedService
-{
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
 }

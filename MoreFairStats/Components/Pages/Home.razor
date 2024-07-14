@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/rounds"
 @using System.Text.Json
 @using Azure.Identity
 @using Microsoft.Azure.Cosmos
@@ -105,7 +105,7 @@
         roundStats = await moreFairData.GetRound(round);
     }
 
-    private async Task<LadderStats> parseLadderStats(int round, int ladder)
+    internal async Task<LadderStats> parseLadderStats(int round, int ladder)
     {
         var ladderStats = await moreFairData.GetLadder(round, ladder);
         var queryString = $"SELECT * FROM c WHERE c.Round = {round} AND c.Ladder = {ladder}";
