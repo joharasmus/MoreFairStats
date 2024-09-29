@@ -57,7 +57,7 @@
         </tr>
     </thead>
     <tbody>
-    @foreach (var ranker in ladderStats.Rankers!)
+    @foreach (var ranker in ladderStats.Rankers!.OrderBy(lr => lr.Rank)!)       //Ironing out that weird DB scramble bug with an atrociously slow OrderBy. #Macgyver
     {                
         <tr class="@(ranker.Growing ? "" : "table-dark")">
             <td>@ranker.AccountId</td>

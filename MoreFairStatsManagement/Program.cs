@@ -9,7 +9,6 @@ var programConfig = new ConfigurationBuilder().AddUserSecrets<Program>().Build()
 
 var dbConnStr = programConfig["mfsCosmosDbConnStr"]!;
 var moreFairData = new MoreFairData(dbConnStr);
-
 var mfsConfig = await moreFairData.GetConfig();
 var currentMaxRound = mfsConfig.CurrentMaxRound;
 
@@ -154,4 +153,4 @@ async Task UpdateNewRound(int newRoundNumber)
     await moreFairData.Upsert(mfsConfig);
 }
 
-await UpdateNewRound(279);
+await UpdateNewRound(295);

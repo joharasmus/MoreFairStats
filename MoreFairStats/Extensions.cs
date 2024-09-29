@@ -41,6 +41,9 @@ public static class Extensions
         await container.DeleteItemAsync<T>(id, new PartitionKey(partitionKey));
     }
 
+    public static async Task ReadContainer(this Container container)
+        => await container.ReadContainerAsync();
+
     public static T Deserialize<T>(this string json)
     {
         var jsonSerOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };

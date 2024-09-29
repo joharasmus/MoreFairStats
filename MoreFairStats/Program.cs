@@ -4,7 +4,7 @@ using MoreFairStats.Components;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
 
-var cosmosDbConnString = builder.Configuration["cosmosDbConnstring"]!;
+var cosmosDbConnString = builder.Configuration["mfsCosmosDbConnStr"]!;
 var moreFairData = new MoreFairData(cosmosDbConnString);
 
 // Add services to the container.
