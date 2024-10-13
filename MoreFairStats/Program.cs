@@ -2,16 +2,15 @@ using MoreFairStats;
 using MoreFairStats.Components;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddServerSideBlazor().AddCircuitOptions(options => { options.DetailedErrors = true; });
+builder.Services.AddServerSideBlazor();
 
-var cosmosDbConnString = builder.Configuration["mfsCosmosDbConnStr"]!;
-var moreFairData = new MoreFairData(cosmosDbConnString);
+var mfsCosmosDbConnStr = builder.Configuration["mfsCosmosDbConnStr"]!;
+var moreFairData = new MoreFairData(mfsCosmosDbConnStr);
+builder.Services.AddSingleton(moreFairData);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
-builder.Services.AddSingleton(moreFairData);
 
 var app = builder.Build();
 

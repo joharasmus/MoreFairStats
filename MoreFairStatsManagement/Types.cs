@@ -27,13 +27,13 @@ public class APIRoundStats
 
 public static class MoreFairAPI
 {
-    private static readonly string BaseURL = "https://fair.kaliburg.de/api/stats/round/raw";
+    private static readonly string BaseURL = "https://fair.kaliburg.de/api/stats/round/raw?season=2";
 
     public static async Task<APIRoundStats> GetLatest()
         => await Get(BaseURL);
 
     public static async Task<APIRoundStats> GetRound(int round)
-        => await Get(BaseURL + $"?number={round}");
+        => await Get(BaseURL + $"&round={round}");
 
     private static async Task<APIRoundStats> Get(string url)
     {

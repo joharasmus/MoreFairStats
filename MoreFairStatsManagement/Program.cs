@@ -114,14 +114,16 @@ async Task updateWithNewRoundStats(APIRoundStats apiRoundStats)
                 Round = round,
                 Vinegar = ranker.Vinegar
             };
+
+            var oldPlayer = await moreFairData.GetPlayer(ranker.AccountId);
             var player = new Player()
             {
-                AHPoints = ranker.AssholePoints,
+                //AHPoints = ranker.AssholePoints,   (keep the ahpoints to 0, the first round of the season might have affected them)
                 id = ranker.AccountId.ToString(),
                 UserName = ranker.UserName
             };
             tasks.Add(moreFairData.Upsert(ladderRanker));
-            tasks.Add(moreFairData.Upsert(player));
+            //tasks.Add(moreFairData.Upsert(player));
         }
         await Task.WhenAll(tasks);
 
@@ -153,4 +155,4 @@ async Task UpdateNewRound(int newRoundNumber)
     await moreFairData.Upsert(mfsConfig);
 }
 
-await UpdateNewRound(295);
+await UpdateNewRound(300);

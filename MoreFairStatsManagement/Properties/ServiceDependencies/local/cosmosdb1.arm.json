@@ -36,7 +36,7 @@
     },
     {
       "type": "Microsoft.Resources/deployments",
-      "name": "[concat(parameters('resourceGroupName'), 'Deployment', uniqueString(concat('mfs-cosmosdb-acc', subscription().subscriptionId)))]",
+      "name": "[concat(parameters('resourceGroupName'), 'Deployment', uniqueString(concat('mfs-orig-db', subscription().subscriptionId)))]",
       "resourceGroup": "[parameters('resourceGroupName')]",
       "apiVersion": "2019-10-01",
       "dependsOn": [
@@ -49,12 +49,12 @@
           "contentVersion": "1.0.0.0",
           "resources": [
             {
-              "name": "mfs-cosmosdb-acc",
+              "name": "mfs-orig-db",
               "location": "[parameters('resourceLocation')]",
               "type": "Microsoft.DocumentDB/databaseAccounts",
               "kind": "GlobalDocumentDB",
               "systemData": {
-                "createdAt": "2024-04-24T07:33:50.7291758+02:00"
+                "createdAt": "2024-10-13T18:16:24.6280792+02:00"
               },
               "properties": {
                 "databaseAccountOfferType": "Standard"
