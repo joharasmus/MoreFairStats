@@ -1,20 +1,25 @@
-﻿@page "/rounds"
-@using System.Text.Json
+﻿@page "/rounds/{RoundNumber:int}/{LadderNumber:int?}"
 @using Azure.Identity
 @using Microsoft.Azure.Cosmos
 @using MoreFairStats.Components
 @inject MoreFairData moreFairData
+@inject NavigationManager navMan
 
 <PageTitle>Home</PageTitle>
 
-<form @onsubmit="() => { return; }">
-    <div class="input-group" style="width:25rem;">
-        <span class="input-group-text border-warning" style="background-color:#10141f; color:#e7d5b3">View stats for round number</span>
-        <input type="number" class="form-control border-warning" @bind:get="RoundNumber" @bind:set="SetRoundNumber" @bind:event="oninput" />
-        <button type="button" class="btn btn-outline-warning" @onclick="(() => SetRoundNumber(RoundNumber - 1))">&#8722;</button>
-        <button type="button" class="btn btn-outline-warning" @onclick="(() => SetRoundNumber(RoundNumber + 1))">&#43;</button>
-    </div>
-</form>
+<div class="input-group" style="width:30rem;">
+    <span class="input-group-text border-warning" style="background-color:#10141f; color:#e7d5b3">View stats for round number</span>
+    <select class="form-select form-control" onchange="location = this.value;">
+        <option selected>Round</option>
+        @for (int i = 1; i <= 300; i++)
+        {
+            <option value="/rounds/@i">@i</option>
+        }
+    </select>
+    <a type="button" class="btn btn-outline-warning" href="/rounds/@(RoundNumber - 1)">&#8722;</a>
+    <a type="button" class="btn btn-outline-warning" href="/rounds/@(RoundNumber + 1)">&#43;</a>
+</div>
+
 <br>
 
 @if(roundStats != null)
@@ -51,58 +56,64 @@
 
     @if(ladderStats != null)
     {
-        <RankersTable roundStats="@roundStats" ladderStats="@ladderStats" OnLadderClickCallback="@updateLadderNumber" ></RankersTable>
+        <RankersTable CurrentLadder="@LadderNumber" roundStats="@roundStats" ladderStats="@ladderStats"></RankersTable>
     }
 }
 
 
 @code{
+
     private async Task<int> getCurrentMaxRound()
     {
         return (await moreFairData.GetConfig()).CurrentMaxRound;
     }
 
-    private int _roundNumber;
+    [Parameter]
+    public int RoundNumber { get; set; }
 
-    private int RoundNumber 
-    { 
-        get => _roundNumber;
-    }
-    private async Task SetRoundNumber(int newRoundNumber)
-    {
-        var currentMaxRound = await getCurrentMaxRound();;
-        _roundNumber = newRoundNumber < 1 ? 1 : (newRoundNumber > currentMaxRound ? currentMaxRound : newRoundNumber);
-        await updateRoundNumber();
-    }
+    [Parameter]
+    public int? LadderNumber { get; set; }
 
     private RoundStats? roundStats;
 
     private LadderStats? ladderStats;
 
-
     protected override async Task OnInitializedAsync()
     {
         var currentMaxRound = await getCurrentMaxRound();
-        await SetRoundNumber(currentMaxRound);
+        if (RoundNumber > currentMaxRound)
+        {
+            navMan.NavigateTo($"/rounds/{currentMaxRound}");
+        }
+        if (RoundNumber < 1)
+        {
+            navMan.NavigateTo("/rounds/1");
+        }
+        await updateRoundNumber();
+        if (LadderNumber == null)
+        {
+            navMan.NavigateTo($"/rounds/{RoundNumber}/{roundStats!.NumberOfLadders}");
+        }
+        if (LadderNumber > roundStats!.NumberOfLadders)
+        {
+            navMan.NavigateTo($"/rounds/{RoundNumber}/{roundStats.NumberOfLadders}");
+        }
+        if (LadderNumber < 1)
+        {
+            navMan.NavigateTo($"/rounds/{RoundNumber}/1");
+        }
+        await updateLadderNumber(LadderNumber!.Value);
     }
 
     private async Task updateRoundNumber()
     {
-        await parseRoundStats(RoundNumber);
-        ladderStats = await parseLadderStats(RoundNumber, roundStats!.NumberOfLadders); //Always use the last ladder, which has the same number as the count
-        StateHasChanged();
+        roundStats = await moreFairData.GetRound(RoundNumber);
     }
 
-    private async Task updateLadderNumber(string ladderNum)
+    private async Task updateLadderNumber(int ladderNum)
     {
-        var intLadderNum = Int32.Parse(ladderNum);
-        ladderStats = await parseLadderStats(RoundNumber, intLadderNum);
+        ladderStats = await parseLadderStats(RoundNumber, ladderNum);
         StateHasChanged();
-    }
-
-    private async Task parseRoundStats(int round)
-    {
-        roundStats = await moreFairData.GetRound(round);
     }
 
     internal async Task<LadderStats> parseLadderStats(int round, int ladder)
@@ -111,7 +122,6 @@
         var queryString = $"SELECT * FROM c WHERE c.Round = {round} AND c.Ladder = {ladder}";
         var queryDef = new QueryDefinition(queryString);
         using var queryIter = moreFairData.GetLadderRankersQueryIterator(queryDef);
-        var allResults = new List<FeedResponse<LadderRanker>>();
         var result = await queryIter.ReadNextAsync();
         var allIds = new List<string>();
         foreach (var ladderRanker in result)

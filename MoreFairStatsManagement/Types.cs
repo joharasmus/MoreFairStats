@@ -15,12 +15,12 @@ public class APIRoundStats
         return new()
         {
             BasePointsToPromote = BasePointsToPromote,
-            ClosedOn            = ClosedOn,
-            CreatedOn           = CreatedOn,
-            Number              = Number,
-            NumberOfLadders     = Ladders!.Count,
-            RoundTypes          = RoundTypes,
-            id                  = Number.ToString()
+            ClosedOn = ClosedOn,
+            CreatedOn = CreatedOn,
+            Number = Number,
+            NumberOfLadders = Ladders!.Count,
+            RoundTypes = RoundTypes,
+            id = Number.ToString()
         };
     }
 }
@@ -29,7 +29,7 @@ public static class MoreFairAPI
 {
     private static readonly string BaseURL = "https://fair.kaliburg.de/api/stats/round/raw?season=2";
 
-    public static async Task<APIRoundStats> GetLatest()
+    public static async Task<APIRoundStats> GetLatest()  // OBS! This doesn't work post-s2 anymore ()
         => await Get(BaseURL);
 
     public static async Task<APIRoundStats> GetRound(int round)

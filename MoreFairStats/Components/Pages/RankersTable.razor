@@ -1,25 +1,27 @@
 ﻿
+
 <h5 style="color:#e7d5b3">Select which ladder to show:</h5>
-<nav>
-    @for (int i = 0; i <= maxLadder / 50; i++)
+
+@for (int i = 0; i <= maxLadder / 50; i++)
+{
+<ul class="pagination" style="margin:0px">
+    @for (int j = 1; j <= 50 && j + i * 50 <= maxLadder; j++)
     {
-    <ul class="pagination" style="margin:0px">
-        @for (int j = 1; j <= 50 && j + i * 50 <= maxLadder; j++)
-        {
-            var localVal = j + i * 50;
-            <li class="page-item">
-                 <button class="page-link border-warning" @onclick="@(() => shiftLadder(localVal.ToString()))" style="width:50px; background-color:@(localVal.ToString() == currentLadder ? "#de9e41" : "#10141f"); color:@(localVal.ToString() == currentLadder ? "#090a14" : "#e7d5b3")">@(localVal)</button>
-            </li>
-        }
-    </ul>
+        var localVal = j + i * 50;
+        <li class="page-item">
+                <a type="button" class="btn btn-outline-warning" href="/rounds/@(RoundNumber)/@(localVal)" style="width:50px; background-color:@(localVal == CurrentLadder ? "#de9e41" : "#10141f"); color:@(localVal == CurrentLadder ? "#090a14" : "#e7d5b3")">
+                    @localVal
+                </a>
+        </li>
     }
-</nav>
+</ul>
+}
 
 <br>
 
 <div class="card border-warning" style="width:35rem; background-color:#10141f; color:#e7d5b3">
     <div class="card-body">
-        <h3 class="card-title">Stats for ladder @currentLadder</h3>
+        <h3 class="card-title">Stats for ladder @CurrentLadder</h3>
     </div>
 </div>
 <div class="card-group" style="width:35rem; color:#e7d5b3">
@@ -76,7 +78,6 @@
 </table>
 
 @code {
-    private RoundStats? _roundStats;
 
     [Parameter]
     public RoundStats? roundStats { get; set; }
@@ -87,36 +88,12 @@
     public LadderStats? ladderStats { get; set; }
 
     [Parameter]
-    public EventCallback<string> OnLadderClickCallback { get; set; }
+    public int? CurrentLadder { get; set; }
 
-    public string? currentLadder { get; set; }
-
-    private bool openingNewRound = true;
+    public int RoundNumber => roundStats!.Number;
 
     public string AddSeparators(string number)
     {
         return Int64.Parse(number).ToString("N0");
-    }
-
-    private async void shiftLadder(string ladderNum)
-    {
-        currentLadder = ladderNum;
-        await OnLadderClickCallback.InvokeAsync(ladderNum);
-        StateHasChanged();
-    }
-
-    protected override void OnParametersSet()
-    {
-        if (_roundStats != roundStats)
-        {
-            _roundStats = roundStats;
-            openingNewRound = true;
-        }
-
-        if (openingNewRound)
-        {
-            currentLadder = roundStats!.NumberOfLadders.ToString();
-            openingNewRound = false;
-        }
     }
 }
