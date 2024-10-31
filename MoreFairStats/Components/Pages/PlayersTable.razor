@@ -8,47 +8,47 @@
 {
 <div class="row">
     <div class="col-3">
-        <table class="table table-borderless w-auto" style="background-color:#10141f; color:#e7d5b3">
+        <table class="table table-borderless w-auto">
             <thead>
                 <tr>
-                    <th>Rank</th>
-                    <th>Id</th>
-                    <th>Name</th>
-                    <th>Asshole Points</th>
+                    <th style="color: #e7d5b3; background-color: #10141f">Rank</th>
+                    <th style="color: #e7d5b3; background-color: #10141f">Id</th>
+                    <th style="color: #e7d5b3; background-color: #10141f">Name</th>
+                    <th style="color: #e7d5b3; background-color: #10141f">Asshole Points</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var ranker in TopPlayers[0..50])
                 {
                     <tr>
-                        <td>@(TopPlayers.IndexOf(ranker) + 1)</td>
-                        <td>@ranker.id</td>
-                        <td class="w-auto">@ranker.UserName</td>
-                        <td>@ranker.AHPoints</td>
+                        <td style="color: #e7d5b3; background-color: #10141f">@(TopPlayers.IndexOf(ranker) + 1)</td>
+                        <td style="color: #e7d5b3; background-color: #10141f">@ranker.id</td>
+                        <td style="color: #e7d5b3; background-color: #10141f" class="w-auto">@ranker.UserName</td>
+                        <td style="color: #e7d5b3; background-color: #10141f">@ranker.AHPoints</td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
 
-    <div class="col">
-        <table class="table table-borderless w-auto" style="background-color:#10141f; color:#e7d5b3">
+    <div class="col-3">
+        <table class="table table-borderless w-auto">
             <thead>
                 <tr>
-                    <th>Rank</th>
-                    <th>Id</th>
-                    <th>Name</th>
-                    <th>Asshole Points</th>
+                    <th style="color: #e7d5b3; background-color: #10141f">Rank</th>
+                    <th style="color: #e7d5b3; background-color: #10141f">Id</th>
+                    <th style="color: #e7d5b3; background-color: #10141f">Name</th>
+                    <th style="color: #e7d5b3; background-color: #10141f">Asshole Points</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var ranker in TopPlayers[50..])
                 {
                     <tr>
-                        <td>@(TopPlayers.IndexOf(ranker) + 1)</td>
-                        <td>@ranker.id</td>
-                        <td class="w-auto">@ranker.UserName</td>
-                        <td>@ranker.AHPoints</td>
+                        <td style="color: #e7d5b3; background-color: #10141f">@(TopPlayers.IndexOf(ranker) + 1)</td>
+                        <td style="color: #e7d5b3; background-color: #10141f">@ranker.id</td>
+                        <td style="color: #e7d5b3; background-color: #10141f" class="w-auto">@ranker.UserName</td>
+                        <td style="color: #e7d5b3; background-color: #10141f">@ranker.AHPoints</td>
                     </tr>
                 }
             </tbody>

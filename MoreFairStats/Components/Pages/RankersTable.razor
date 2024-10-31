@@ -24,15 +24,15 @@
         <h3 class="card-title">Stats for ladder @CurrentLadder</h3>
     </div>
 </div>
-<div class="card-group" style="width:35rem; color:#e7d5b3">
-    <div class="card border-warning" style="background-color:#10141f">
+<div class="card-group" style="width:35rem;">
+    <div class="card border-warning" style="color: #e7d5b3; background-color:#10141f">
         <div class="card-header border-warning">Ladder info</div>
         <div class="card-body">
             <p>Base points: <b>@(AddSeparators(ladderStats!.BasePointsToPromote!))</b></p>
             <p class="card-text">Ladder types: @string.Join(", ", ladderStats.LadderTypes!)</p>
         </div>
     </div>
-    <div class="card border-warning" style="background-color:#10141f">
+    <div class="card border-warning" style="color: #e7d5b3; background-color:#10141f">
         <div class="card-header border-warning">Ladder start</div>
         <div class="card-body">
             <p class="card-text">Date: @ladderStats.CreatedOn!.Substring(0, 19).Split('T')[0]</p>
@@ -43,35 +43,35 @@
 
 <br>
 
-<table class="table table-borderless" style="background-color:#10141f; color:#e7d5b3">
+<table class="table table-borderless">
     <thead>
         <tr>
-            <th>Id</th>
-            <th>Name</th>
-            <th>Rank</th>
-            <th>Points</th>
-            <th>Power</th>
-            <th>Bias</th>
-            <th>Multi</th>
-            <th>Grapes</th>
-            <th>Vinegar</th>
-            <th>AutoPromote</th>
+            <th style="color: #e7d5b3; background-color: #10141f">Id</th>    <!--I really should figure out a better workaround, classes don't work for some reason, not even with !important-->
+            <th style="color: #e7d5b3; background-color: #10141f">Name</th>
+            <th style="color: #e7d5b3; background-color: #10141f">Rank</th>
+            <th style="color: #e7d5b3; background-color: #10141f">Points</th>
+            <th style="color: #e7d5b3; background-color: #10141f">Power</th>
+            <th style="color: #e7d5b3; background-color: #10141f">Bias</th>
+            <th style="color: #e7d5b3; background-color: #10141f">Multi</th>
+            <th style="color: #e7d5b3; background-color: #10141f">Grapes</th>
+            <th style="color: #e7d5b3; background-color: #10141f">Vinegar</th>
+            <th style="color: #e7d5b3; background-color: #10141f">AutoPromote</th>
         </tr>
     </thead>
     <tbody>
     @foreach (var ranker in ladderStats.Rankers!.OrderBy(lr => lr.Rank)!)       //Ironing out that weird DB scramble bug with an atrociously slow OrderBy. #Macgyver
     {                
         <tr class="@(ranker.Growing ? "" : "table-dark")">
-            <td>@ranker.AccountId</td>
-            <td>@ranker.UserName</td>
-            <td>@ranker.Rank</td>
-            <td>@(AddSeparators(ranker.Points!))</td>
-            <td>@(AddSeparators(ranker.Power!))</td>
-            <td>@ranker.Bias</td>
-            <td>@ranker.Multi</td>
-            <td>@(AddSeparators(ranker.Grapes!))</td>
-            <td>@(AddSeparators(ranker.Vinegar!))</td>
-            <td>@ranker.AutoPromote</td>
+            <td style="color: #e7d5b3; background-color: #10141f">@ranker.AccountId</td>
+            <td style="color: #e7d5b3; background-color: #10141f">@ranker.UserName</td>
+            <td style="color: #e7d5b3; background-color: #10141f">@ranker.Rank</td>
+            <td style="color: #e7d5b3; background-color: #10141f">@(AddSeparators(ranker.Points!))</td>
+            <td style="color: #e7d5b3; background-color: #10141f">@(AddSeparators(ranker.Power!))</td>
+            <td style="color: #e7d5b3; background-color: #10141f">@ranker.Bias</td>
+            <td style="color: #e7d5b3; background-color: #10141f">@ranker.Multi</td>
+            <td style="color: #e7d5b3; background-color: #10141f">@(AddSeparators(ranker.Grapes!))</td>
+            <td style="color: #e7d5b3; background-color: #10141f">@(AddSeparators(ranker.Vinegar!))</td>
+            <td style="color: #e7d5b3; background-color: #10141f">@ranker.AutoPromote</td>
         </tr>
     }
     </tbody>
