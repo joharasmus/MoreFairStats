@@ -36,5 +36,5 @@ jobs:
         with:
           app-name: 'moreFairStats'
           slot-name: 'Production'
-          package: .
+          package: ${{env.DOTNET_ROOT}}/myapp
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C77EC738FC904E5DA1BF49675B6B2D4A }}
