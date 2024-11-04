@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+      - name: Check out repo
       - uses: actions/checkout@v4
 
       - name: Set up .NET Core
@@ -16,11 +17,10 @@ jobs:
         with:
           dotnet-version: '8.0.403'
 
-      - name: dotnet publish
+      - name: Publish application
         run: dotnet publish MoreFairStats/MoreFairStats.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
       
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'moreFairStats'
