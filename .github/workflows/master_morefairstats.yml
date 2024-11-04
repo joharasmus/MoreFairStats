@@ -16,9 +16,6 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      - name: Build with dotnet
-        run: dotnet build MoreFairStats/MoreFairStats.csproj --configuration Release
-
       - name: dotnet publish
         run: dotnet publish MoreFairStats/MoreFairStats.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
       
