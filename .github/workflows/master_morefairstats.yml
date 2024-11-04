@@ -27,6 +27,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'moreFairStats'
-          slot-name: 'Production'
           package: ${{env.DOTNET_ROOT}}/myapp
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C77EC738FC904E5DA1BF49675B6B2D4A }}
