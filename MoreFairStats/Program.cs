@@ -2,7 +2,6 @@ using MoreFairStats;
 using MoreFairStats.Components;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddServerSideBlazor();
 
 var mfsCosmosDbConnStr = builder.Configuration["mfsCosmosDbConnStr"]!;
 var moreFairData = new MoreFairData(mfsCosmosDbConnStr);
