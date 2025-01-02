@@ -1,6 +1,6 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 
-name: Build and deploy ASP.Net Core app to Azure Web App - moreFairStats
+name: Build and deploy moreFairStats to Azure Web App
 
 on: workflow_dispatch
 
@@ -15,7 +15,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.403'
+          dotnet-version: '8.0.404'
 
       - name: Publish application
         run: dotnet publish MoreFairStats/MoreFairStats.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
