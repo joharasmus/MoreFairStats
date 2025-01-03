@@ -23,6 +23,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: joharasmus/webapps-deploy@v1
         with:
-          app-name: 'moreFairStats'
           package: ${{env.DOTNET_ROOT}}/myapp
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
