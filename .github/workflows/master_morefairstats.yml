@@ -1,6 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-
-name: Build and deploy moreFairStats to Azure Web App
+name: Build and deploy to Azure Web App
 
 on: workflow_dispatch
 
