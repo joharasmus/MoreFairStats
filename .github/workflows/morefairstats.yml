@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v4.3.0
 
-      - run: dotnet publish MoreFairStats/MoreFairStats.csproj -c Release -o .
+      - run: dotnet publish MoreFairStats/MoreFairStats.csproj -c Release -o ./
 
       - uses: azure/webapps-deploy@v3.0.2
         with:
