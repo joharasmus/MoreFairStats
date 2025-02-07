@@ -34,11 +34,6 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: .net-app
-
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
@@ -46,4 +41,4 @@ jobs:
           app-name: 'morefairstats2'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2544BB0323C241FB9322CD5CD4CBC235 }}
-          package: .
+          package: ${{env.DOTNET_ROOT}}/myapp
