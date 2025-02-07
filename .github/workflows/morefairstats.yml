@@ -16,12 +16,12 @@ jobs:
 
       - uses: actions/setup-dotnet@v4.3.0
 
-      - run: dotnet publish MoreFairStats/MoreFairStats.csproj -c Release -o /myapp
+      - run: dotnet publish MoreFairStats/MoreFairStats.csproj -c Release -o ./myapp
 
       - uses: azure/webapps-deploy@v3.0.2
         with:
           app-name: 'morefairstats2'
           publish-profile: ${{secrets.AZUREAPPSERVICE_PUBLISHPROFILE}}
-          package: /myapp
+          package: ./myapp
           clean: true
           restart: true
