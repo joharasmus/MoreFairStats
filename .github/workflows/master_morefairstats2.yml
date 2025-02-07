@@ -21,9 +21,6 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Build with dotnet
-        run: dotnet build --configuration Release
-
       - name: dotnet publish
         run: dotnet publish MoreFairStats/MoreFairStats.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
@@ -32,6 +29,5 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'morefairstats2'
-          slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2544BB0323C241FB9322CD5CD4CBC235 }}
           package: ${{env.DOTNET_ROOT}}/myapp
