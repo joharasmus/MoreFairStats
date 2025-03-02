@@ -62,18 +62,6 @@
     <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$(PublishIntermediateTempPath)Out\</PublishIntermediateOutputPath>
   </PropertyGroup>
 
-  <Import Project="$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.ComputeFiles.targets" Condition="Exists('$(_ComputeTargetsDir)Microsoft.NET.Sdk.Publish.ComputeFiles.targets')" />
-
-  <Import Project="$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.FilterFiles.targets" Condition="Exists('$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.FilterFiles.targets')"/>
-
-  <Import Project="$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.CopyFiles.targets" Condition="Exists('$(_CopyTargetsDir)Microsoft.NET.Sdk.Publish.CopyFiles.targets')"/>
-
-  <Import Project="$(_TransformTargetsDir)Microsoft.NET.Sdk.Publish.TransformFiles.targets" Condition="Exists('$(_TransformTargetsDir)Microsoft.NET.Sdk.Publish.TransformFiles.targets')"/>
-
-  <Import Project="$(_PublishTargetsDir)Microsoft.NET.Sdk.Publish.$(PublishProtocol).targets" Condition="Exists('$(_PublishTargetsDir)Microsoft.NET.Sdk.Publish.$(PublishProtocol).targets')"/>
-
-  <Import Project="$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets" Condition="Exists('$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets')"/>
-
   <Target Name="DotNetPublish"
           DependsOnTargets="$(_DotNetPublishComputeFiles);$(_DotNetPublishCopyFiles);$(_DotNetPublishTransformFiles);$(_DotNetPublishFiles);"
           AfterTargets="Build" >
