@@ -21,6 +21,4 @@
     <ProjectCapability Include="AppServicePublish" />
   </ItemGroup>
 
-  <Import Project="$(MSBuildWebTargetsPath)Microsoft.Web.Designtime.targets"/>
-
 </Project>
