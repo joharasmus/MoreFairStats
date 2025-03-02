@@ -29,8 +29,6 @@
     <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
   </PropertyGroup>
 
-  <Import Project="$(_PublishProfilesDir)$(PublishProfileName).pubxml" Condition="Exists('$(_PublishProfilesDir)$(PublishProfileName).pubxml') And '$(PublishProfileImported)' != 'true'" />
-
   <Target Name="DotNetPublish"
           DependsOnTargets="$(_DotNetPublishComputeFiles);$(_DotNetPublishCopyFiles);$(_DotNetPublishTransformFiles);$(_DotNetPublishFiles);"
           AfterTargets="Build" >
