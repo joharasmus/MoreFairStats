@@ -75,30 +75,8 @@
   <Import Project="$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets" Condition="Exists('$(_DotNetCLIToolTargetsDir)Microsoft.NET.Sdk.DotNetCLITool.targets')"/>
 
   <Target Name="DotNetPublish"
-          DependsOnTargets="$(CorePublishDependsOn)"
+          DependsOnTargets="$(_DotNetPublishComputeFiles);$(_DotNetPublishCopyFiles);$(_DotNetPublishTransformFiles);$(_DotNetPublishFiles);"
           AfterTargets="Build" >
   </Target>
-
-  <PropertyGroup>
-    <CorePublishDependsOn>
-      $(_DotNetPublishComputeFiles);
-      $(_DotNetPublishCopyFiles);
-      $(_DotNetPublishTransformFiles);
-      $(_DotNetPublishFiles);
-    </CorePublishDependsOn>
-  </PropertyGroup>
-
-  <!--
-  ***********************************************************************************************
-  NOTE: We have to add WebPublishProfileFile to GlobalPropertiesToRemove to prevent it to flow to
-  other web apps that are referenced by current web app. If we don't do that, their output paths
-  will be messed up with RuntimeIdentifier we pass in pubxml file.
-  ***********************************************************************************************
-  -->
-  <ItemDefinitionGroup>
-    <ProjectReference>
-      <GlobalPropertiesToRemove>%(GlobalPropertiesToRemove);WebPublishProfileFile</GlobalPropertiesToRemove>
-    </ProjectReference>
-  </ItemDefinitionGroup>
 
 </Project>
