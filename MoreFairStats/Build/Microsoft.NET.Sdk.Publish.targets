@@ -54,9 +54,6 @@
 
     <_TargetFrameworkPath Condition="'$(_TargetFrameworkPath)' == '' And '$(TargetFramework)' != ''">$(TargetFramework)\</_TargetFrameworkPath>
     <_RuntimeIdentifierPath Condition="'$(_RuntimeIdentifierPath)' == '' And '$(RuntimeIdentifier)' != '' ">$(RuntimeIdentifier)\</_RuntimeIdentifierPath>
-
-    <BaseIntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(BaseIntermediateOutputPath)))' == 'False'">$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
-    <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
   </PropertyGroup>
 
   <Target Name="DotNetPublish"
