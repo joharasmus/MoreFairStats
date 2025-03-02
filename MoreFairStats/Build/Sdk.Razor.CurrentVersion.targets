@@ -598,8 +598,7 @@
   </Target>
 	
   <PropertyGroup Condition="'$(RazorDesignTimeTargets)'==''">
-    <RazorDesignTimeTargets>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Razor\Microsoft.NET.Sdk.Razor.DesignTime.targets</RazorDesignTimeTargets>
-    <RazorDesignTimeTargets Condition="!Exists('$(RazorDesignTimeTargets)')">$(MSBuildThisFileDirectory)Microsoft.NET.Sdk.Razor.DesignTime.targets</RazorDesignTimeTargets>
+    <RazorDesignTimeTargets>.\Microsoft.NET.Sdk.Razor.DesignTime.targets</RazorDesignTimeTargets>
   </PropertyGroup>
 
   <Import Project="$(RazorDesignTimeTargets)" />
