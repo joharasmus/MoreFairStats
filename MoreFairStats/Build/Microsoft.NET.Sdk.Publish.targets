@@ -57,9 +57,6 @@
 
     <BaseIntermediateOutputPath Condition="'$([System.IO.Path]::IsPathRooted($(BaseIntermediateOutputPath)))' == 'False'">$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
     <BaseIntermediateOutputPath Condition="!HasTrailingSlash('$(BaseIntermediateOutputPath)')">$(BaseIntermediateOutputPath)\</BaseIntermediateOutputPath>
-
-    <PublishIntermediateTempPath Condition="'$(PublishIntermediateTempPath)' == ''">$([System.IO.Path]::GetFullPath($(BaseIntermediateOutputPath)$(_PublishConfigurationPath)$(_TargetFrameworkPath)$(_RuntimeIdentifierPath)PubTmp\))</PublishIntermediateTempPath>
-    <PublishIntermediateOutputPath Condition="'$(PublishIntermediateOutputPath)' == ''">$(PublishIntermediateTempPath)Out\</PublishIntermediateOutputPath>
   </PropertyGroup>
 
   <Target Name="DotNetPublish"
