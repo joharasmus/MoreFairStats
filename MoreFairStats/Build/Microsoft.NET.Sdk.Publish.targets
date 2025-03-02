@@ -5,15 +5,6 @@
 
   <PropertyGroup>
     <SupportsDeployOnBuild>true</SupportsDeployOnBuild>
-    <_PublishTaskFramework>net8.0</_PublishTaskFramework>
-    <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
-    <_PublishTaskAssemblyFullPath Condition=" '$(_PublishTaskAssemblyFullPath)'=='' ">$(_PublishTasksDir)Microsoft.NET.Sdk.Publish.Tasks.dll</_PublishTaskAssemblyFullPath>
-    <_CopyTargetsDir Condition=" '$(_CopyTargetsDir)' == ''">$(MSBuildThisFileDirectory)CopyTargets\</_CopyTargetsDir>
-    <_TransformTargetsDir Condition=" '$(_TransformTargetsDir)' == ''">$(MSBuildThisFileDirectory)TransformTargets\</_TransformTargetsDir>
-    <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
-    <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
-    <_DotNetCLIToolTargetsDir Condition=" '$(_DotNetCLIToolTargetsDir)'=='' ">$(MSBuildThisFileDirectory)DotNetCLIToolTargets\</_DotNetCLIToolTargetsDir>
-
     <PublishIISAssets>false</PublishIISAssets>
   </PropertyGroup>
 
