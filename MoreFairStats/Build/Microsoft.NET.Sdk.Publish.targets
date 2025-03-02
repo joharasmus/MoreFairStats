@@ -4,7 +4,6 @@
   <!-- Properties corresponding to the tasks and targets path-->
 
   <PropertyGroup>
-    <!-- We want to force this property to be true -->
     <SupportsDeployOnBuild>true</SupportsDeployOnBuild>
     <_PublishTaskFramework>net8.0</_PublishTaskFramework>
     <_PublishTasksDir Condition=" '$(_PublishTasksDir)'=='' ">$(MSBuildThisFileDirectory)..\tools\$(_PublishTaskFramework)\</_PublishTasksDir>
@@ -14,19 +13,8 @@
     <_ComputeTargetsDir Condition=" '$(_ComputeTargetsDir)'=='' ">$(MSBuildThisFileDirectory)ComputeTargets\</_ComputeTargetsDir>
     <_PublishTargetsDir Condition=" '$(_PublishTargetsDir)'=='' ">$(MSBuildThisFileDirectory)PublishTargets\</_PublishTargetsDir>
     <_DotNetCLIToolTargetsDir Condition=" '$(_DotNetCLIToolTargetsDir)'=='' ">$(MSBuildThisFileDirectory)DotNetCLIToolTargets\</_DotNetCLIToolTargetsDir>
-    <_PublishProfilesDir Condition=" '$(_PublishProfilesDir)'=='' ">$(MSBuildThisFileDirectory)PublishProfiles\</_PublishProfilesDir>
 
     <PublishIISAssets>false</PublishIISAssets>
-  </PropertyGroup>
-
-  <!--
-  ***********************************************************************************************
-  Import the Default PublishProfile if the profile is not already imported by the .NET SDK
-  ***********************************************************************************************
- -->
-  <PropertyGroup Condition="'$(PublishProfileImported)' != 'true'">
-    <PublishProfile Condition="'$(PublishProfile)' ==''">Default</PublishProfile>
-    <PublishProfileName Condition="'$(PublishProfileName)' == ''">$([System.IO.Path]::GetFileNameWithoutExtension($(PublishProfile)))</PublishProfileName>
   </PropertyGroup>
 
   <Target Name="DotNetPublish"
