@@ -14,11 +14,4 @@
     <AspNetCoreModuleName Condition="'$(AspNetCoreModuleName)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' != '' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0' ">AspNetCoreModuleV2</AspNetCoreModuleName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectCapability Include="DotNetCoreWeb" />
-    <ProjectCapability Include="AspNetCore" />
-    <ProjectCapability Include="Web" />
-    <ProjectCapability Include="AppServicePublish" />
-  </ItemGroup>
-
 </Project>
