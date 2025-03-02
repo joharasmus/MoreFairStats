@@ -1,9 +1,0 @@
-
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
-  <Target Name="DotNetPublish"
-          DependsOnTargets="$(_DotNetPublishComputeFiles);$(_DotNetPublishCopyFiles);$(_DotNetPublishTransformFiles);$(_DotNetPublishFiles);"
-          AfterTargets="Build" >
-  </Target>
-
-</Project>

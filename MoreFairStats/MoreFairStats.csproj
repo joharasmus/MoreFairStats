@@ -24,9 +24,16 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Build\" />
+  </ItemGroup>
+
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
   <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.targets" />
   <Import Sdk="Microsoft.NET.Sdk.Web.ProjectSystem" Project="Sdk.targets" />
-  <Import Project=".\Build\Microsoft.NET.Sdk.Publish.targets" />
+  <Target Name="DotNetPublish" 
+		  DependsOnTargets="$(_DotNetPublishComputeFiles);$(_DotNetPublishCopyFiles);$(_DotNetPublishTransformFiles);$(_DotNetPublishFiles);" 
+		  AfterTargets="Build">
+  </Target>
 </Project>
  
