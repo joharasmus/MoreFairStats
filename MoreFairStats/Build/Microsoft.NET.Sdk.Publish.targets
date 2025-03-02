@@ -1,13 +1,6 @@
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- Properties corresponding to the tasks and targets path-->
-
-  <PropertyGroup>
-    <SupportsDeployOnBuild>true</SupportsDeployOnBuild>
-    <PublishIISAssets>false</PublishIISAssets>
-  </PropertyGroup>
-
   <Target Name="DotNetPublish"
           DependsOnTargets="$(_DotNetPublishComputeFiles);$(_DotNetPublishCopyFiles);$(_DotNetPublishTransformFiles);$(_DotNetPublishFiles);"
           AfterTargets="Build" >
