@@ -1,0 +1,26 @@
+﻿
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets"
+          Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets') AND '$(EnableTypeScriptNuGetTarget)' != 'true'"/>
+
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.DotNetCore.targets"
+          Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.DotNetCore.targets') AND '$(EnableTypeScriptNuGetTarget)' != 'true'"/>
+
+  <PropertyGroup>
+    <RunWorkingDirectory Condition=" '$(RunWorkingDirectory)' == '' and '$(EnableDefaultRunWorkingDirectory)' != 'false' ">$(MSBuildProjectDirectory)</RunWorkingDirectory>
+    <MSBuildWebTargetsPath>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\Managed.Web\</MSBuildWebTargetsPath>
+    <AspNetCoreHostingModel Condition="'$(AspNetCoreHostingModel)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' != '' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0' ">inprocess</AspNetCoreHostingModel>
+    <AspNetCoreModuleName Condition="'$(AspNetCoreModuleName)' == '' And '$(TargetFrameworkIdentifier)' == '.NETCoreApp' And '$(_TargetFrameworkVersionWithoutV)' != '' And '$(_TargetFrameworkVersionWithoutV)' &gt;= '3.0' ">AspNetCoreModuleV2</AspNetCoreModuleName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectCapability Include="DotNetCoreWeb" />
+    <ProjectCapability Include="AspNetCore" />
+    <ProjectCapability Include="Web" />
+    <ProjectCapability Include="AppServicePublish" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildWebTargetsPath)Microsoft.Web.Designtime.targets"/>
+
+</Project>
