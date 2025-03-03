@@ -14,7 +14,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target Name="_PrepareRazorSourceGenerators"
     BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun"
-    DependsOnTargets="PrepareForRazorGenerate;PrepareForRazorComponentGenerate">
+    DependsOnTargets="AssignRazorComponentTargetPaths">
 
     <ItemGroup>
       <Analyzer Include=".\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;.\Build\Microsoft.AspNetCore.Razor.Utilities.Shared.dll;.\Build\Microsoft.Extensions.ObjectPool.dll;" />
