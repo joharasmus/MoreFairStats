@@ -34,7 +34,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     </GenerateRazorTargetAssemblyInfoDependsOn>
 
     <GenerateRazorTargetAssemblyInfoDependsOn>
-      _ResolveMvcAssemblyAttributes;
       $(GenerateRazorTargetAssemblyInfoDependsOn)
     </GenerateRazorTargetAssemblyInfoDependsOn>
   </PropertyGroup>
@@ -187,7 +186,6 @@ Copyright (c) .NET Foundation. All rights reserved.
 
     <!-- In 3.0 or later, we need to invoke a target to determine MVC specific configuration. -->
     <_GenerateRazorAssemblyInfoDependsOn>
-      _ResolveMvcAssemblyAttributes;
       $(_GenerateRazorAssemblyInfoDependsOn);
     </_GenerateRazorAssemblyInfoDependsOn>
   </PropertyGroup>

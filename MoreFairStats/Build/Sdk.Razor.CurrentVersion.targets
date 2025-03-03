@@ -47,7 +47,6 @@
     <PrepareForRazorGenerateDependsOn Condition="'$(UseRazorSourceGenerator)' != 'true'">
       $(PrepareForRazorGenerateDependsOn);
       ResolveAssemblyReferenceRazorGenerateInputs;
-      _CheckForMissingRazorCompiler;
       ResolveTagHelperRazorGenerateInputs
     </PrepareForRazorGenerateDependsOn>
 
@@ -63,7 +62,6 @@
 
     <RazorGenerateDependsOn Condition="'$(UseRazorSourceGenerator)' != 'true'">
       $(RazorGenerateDependsOn);
-      _CheckForMissingRazorCompiler;
       RazorCoreGenerate
     </RazorGenerateDependsOn>
   </PropertyGroup>
@@ -159,8 +157,13 @@
     <ResolvedRazorCompileToolset Condition="'$(MvcRazorCompileOnPublish)' == '' AND '$(RazorCompileToolset)' == 'RazorSdk'">$(RazorCompileToolset)</ResolvedRazorCompileToolset>
   </PropertyGroup>
 
-  <!-- When targeting 3.x and later projects, we have to infer configuration by inspecting the project. -->
-  <Import Project=".\Microsoft.NET.Sdk.Razor.Configuration.targets" />
+  <PropertyGroup Condition="'$(RazorDefaultConfiguration)'==''">
+	<RazorDefaultConfiguration>Default</RazorDefaultConfiguration>
+  </PropertyGroup>
+
+  <ItemGroup>
+	<RazorConfiguration Include="Default" />
+  </ItemGroup>
 
   <Import Project=".\Microsoft.NET.Sdk.Razor.CodeGeneration.targets" />
 
@@ -169,8 +172,6 @@
   <Import Project=".\Microsoft.NET.Sdk.Razor.SourceGenerators.targets" Condition="'$(UseRazorSourceGenerator)' == 'true'" />
 
   <Import Project=".\Microsoft.NET.Sdk.Razor.GenerateAssemblyInfo.targets" />
-
-  <Import Project=".\Microsoft.NET.Sdk.Razor.MvcApplicationPartsDiscovery.targets" />
 
   <Target Name="PrepareForRazorGenerate" DependsOnTargets="$(PrepareForRazorGenerateDependsOn)">
   </Target>
@@ -383,14 +384,6 @@
         Include="@(IntermediateAssembly->Metadata('FullPath'))"
         Condition="'$(_RazorComponentDeclarationAssemblyFullPath)' == ''" />
     </ItemGroup>
-  </Target>
-
-  <Target Name="_CheckForMissingRazorCompiler" Condition="'$(IsRazorCompilerReferenced)' != 'true'">
-    <Error
-      Code="RAZORSDK1003"
-      Text="A PackageReference for 'Microsoft.AspNetCore.Razor.Design' was not included in your project. This package is required to compile Razor files. Typically, a
- transitive reference to 'Microsoft.AspNetCore.Razor.Design' and references required to compile Razor files are obtained by adding a PackageReference
- for 'Microsoft.AspNetCore.Mvc' in your project. For more information, see https://go.microsoft.com/fwlink/?linkid=868374." />
   </Target>
 
   <Target Name="_ResolveGeneratedRazorCompileInputs">

@@ -16,10 +16,6 @@ Copyright (c) .NET Foundation. All rights reserved.
     BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun"
     DependsOnTargets="PrepareForRazorGenerate;PrepareForRazorComponentGenerate">
 
-    <PropertyGroup>
-      <ProvideApplicationPartFactoryAttributeTypeName Condition="'$(ProvideApplicationPartFactoryAttributeTypeName)' == ''">Microsoft.AspNetCore.Mvc.ApplicationParts.ConsolidatedAssemblyApplicationPartFactory, Microsoft.AspNetCore.Mvc.Razor</ProvideApplicationPartFactoryAttributeTypeName>
-    </PropertyGroup>
-
     <!-- Configure analyzers -->
     <ItemGroup>
       <Analyzer Include=".\Build\Microsoft.AspNetCore.Razor.Utilities.Shared.dll;.\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;.\Build\Microsoft.Extensions.ObjectPool.dll;.\Build\System.Collections.Immutable.dll;" />
@@ -47,12 +43,6 @@ Copyright (c) .NET Foundation. All rights reserved.
       <_RazorAdditionalFile Include="@(RazorComponentWithTargetPath)" />
       <!-- Ignore .cshtml files if RazorCompileOnBuild=false -->
       <_RazorAdditionalFile Include="@(RazorGenerateWithTargetPath)" Condition="'$(RazorCompileOnBuild)' != 'false'" />
-    </ItemGroup>
-
-    <ItemGroup Condition="@(_RazorAdditionalFile->WithMetadataValue('Extension', '.cshtml')->Count()) > 0" >
-      <_RazorAssemblyAttribute Include="Microsoft.AspNetCore.Mvc.ApplicationParts.ProvideApplicationPartFactoryAttribute">
-        <_Parameter1>$(ProvideApplicationPartFactoryAttributeTypeName)</_Parameter1>
-      </_RazorAssemblyAttribute>
     </ItemGroup>
 
     <EncodeRazorInputItem RazorInputItems="@(_RazorAdditionalFile)">
