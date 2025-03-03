@@ -22,8 +22,6 @@
     <UseRazorBuildServer>true</UseRazorBuildServer>
   </PropertyGroup>
 
-  <Import Project=".\Microsoft.NET.Sdk.Razor.CodeGeneration.targets" />
-
   <Import Project=".\Microsoft.NET.Sdk.Razor.Component.targets" />
 
   <Import Project=".\Microsoft.NET.Sdk.Razor.SourceGenerators.targets" />
