@@ -2,27 +2,14 @@
 <Project ToolsVersion="14.0">
 
   <PropertyGroup>
-    <RazorSdkBuildTasksAssembly>.\Microsoft.NET.Sdk.Razor.Tasks.dll</RazorSdkBuildTasksAssembly>
-    <_RazorSdkToolAssembly>.\rzc.dll</_RazorSdkToolAssembly>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(DOTNET_HOST_PATH)' == ''">
-    <_RazorSdkDotNetHostDirectory>$(NetCoreRoot)</_RazorSdkDotNetHostDirectory>
-    <_RazorSdkDotNetHostFileName>dotnet</_RazorSdkDotNetHostFileName>
-    <_RazorSdkDotNetHostFileName Condition="'$(OS)' == 'Windows_NT'">dotnet.exe</_RazorSdkDotNetHostFileName>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <RazorLangVersion>8.0</RazorLangVersion>
-
-    <RazorGenerateIntermediateOutputPath>$(IntermediateOutputPath)Razor\</RazorGenerateIntermediateOutputPath>
-
-    <_RazorComponentDeclarationOutputPath>$(IntermediateOutputPath)RazorDeclaration\</_RazorComponentDeclarationOutputPath>
-
-    <UseRazorBuildServer>true</UseRazorBuildServer>
   </PropertyGroup>
 
-  <Target Name="AssignRazorComponentTargetPaths">
+  <UsingTask TaskName="Microsoft.AspNetCore.Razor.Tasks.EncodeRazorInputItem" AssemblyFile=".\Microsoft.NET.Sdk.Razor.Tasks.dll" />
+
+  <Target Name="_PrepareRazorSourceGenerators"
+	BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun">
+	  
     <ItemGroup>
       <RazorComponent Include="@(Content)" Condition="'%(Content.Extension)'=='.razor'" />
     </ItemGroup>
@@ -30,41 +17,28 @@
     <AssignTargetPath Files="@(RazorComponent)" RootFolder="$(MSBuildProjectDirectory)">
       <Output TaskParameter="AssignedFiles" ItemName="RazorComponentWithTargetPath" />
     </AssignTargetPath>
-
+	  
     <ItemGroup>
       <RazorComponentWithTargetPath>
-        <GeneratedOutput>$(RazorGenerateIntermediateOutputPath)%(RazorComponentWithTargetPath.TargetPath)$(RazorGenerateOutputFileExtension)</GeneratedOutput>
-        <GeneratedDeclaration>$(_RazorComponentDeclarationOutputPath)%(RazorComponentWithTargetPath.TargetPath)$(RazorGenerateOutputFileExtension)</GeneratedDeclaration>
+        <GeneratedOutput>Razor\%(RazorComponentWithTargetPath.TargetPath)</GeneratedOutput>
+        <GeneratedDeclaration>RazorDeclaration\%(RazorComponentWithTargetPath.TargetPath)</GeneratedDeclaration>
       </RazorComponentWithTargetPath>
-    </ItemGroup>
-  </Target>
+		
+	  <Analyzer Include=".\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;.\Build\Microsoft.AspNetCore.Razor.Utilities.Shared.dll;.\Build\Microsoft.Extensions.ObjectPool.dll;" />
 
-	<UsingTask TaskName="Microsoft.AspNetCore.Razor.Tasks.EncodeRazorInputItem" AssemblyFile="$(RazorSdkBuildTasksAssembly)" />
-
-  <Target Name="_PrepareRazorSourceGenerators"
-	BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun"
-	DependsOnTargets="AssignRazorComponentTargetPaths">
-
-	<ItemGroup>
-		<Analyzer Include=".\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;.\Build\Microsoft.AspNetCore.Razor.Utilities.Shared.dll;.\Build\Microsoft.Extensions.ObjectPool.dll;" />
-
-		<RazorComponentWithTargetPath
-			GeneratedOutputFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))"
-			GeneratedDeclarationFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedDeclaration)))" />
-		<CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="TargetPath" />
-		<CompilerVisibleProperty Include="RazorLangVersion" />
-		<_RazorAdditionalFile Include="@(RazorComponentWithTargetPath)" />
+	  <RazorComponentWithTargetPath
+		GeneratedOutputFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))"
+		GeneratedDeclarationFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedDeclaration)))" />
 	</ItemGroup>
 
-	<EncodeRazorInputItem RazorInputItems="@(_RazorAdditionalFile)">
+	<EncodeRazorInputItem RazorInputItems="@(RazorComponentWithTargetPath)">
 		<Output TaskParameter="EncodedRazorInputItems" ItemName="_RazorSpecialCharacterWorkaround" />
 	</EncodeRazorInputItem>
 
 	<ItemGroup>
-		<_RazorAdditionalFile Remove="@(_RazorAdditionalFile)" />
-		<_RazorAdditionalFile Include="@(_RazorSpecialCharacterWorkaround)" />
-
-		<AdditionalFiles Include="@(_RazorAdditionalFile)" />
+		<AdditionalFiles Include="@(_RazorSpecialCharacterWorkaround)" />
+		<CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="TargetPath" />
+		<CompilerVisibleProperty Include="RazorLangVersion" />
 	</ItemGroup>
   </Target>
 
