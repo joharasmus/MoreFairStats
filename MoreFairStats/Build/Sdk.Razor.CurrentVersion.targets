@@ -22,8 +22,6 @@
     <UseRazorBuildServer>true</UseRazorBuildServer>
   </PropertyGroup>
 
-  <Import Project=".\Microsoft.NET.Sdk.Razor.SourceGenerators.targets" />
-
   <Target Name="AssignRazorComponentTargetPaths">
     <ItemGroup>
       <RazorComponent Include="@(Content)" Condition="'%(Content.Extension)'=='.razor'" />
@@ -41,15 +39,43 @@
     </ItemGroup>
   </Target>
 
+	<UsingTask TaskName="Microsoft.AspNetCore.Razor.Tasks.EncodeRazorInputItem" AssemblyFile="$(RazorSdkBuildTasksAssembly)" />
+
+  <Target Name="_PrepareRazorSourceGenerators"
+	BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun"
+	DependsOnTargets="AssignRazorComponentTargetPaths">
+
+	<ItemGroup>
+		<Analyzer Include=".\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;.\Build\Microsoft.AspNetCore.Razor.Utilities.Shared.dll;.\Build\Microsoft.Extensions.ObjectPool.dll;" />
+
+		<RazorComponentWithTargetPath
+			GeneratedOutputFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))"
+			GeneratedDeclarationFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedDeclaration)))" />
+		<CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="TargetPath" />
+		<CompilerVisibleProperty Include="RazorLangVersion" />
+		<_RazorAdditionalFile Include="@(RazorComponentWithTargetPath)" />
+	</ItemGroup>
+
+	<EncodeRazorInputItem RazorInputItems="@(_RazorAdditionalFile)">
+		<Output TaskParameter="EncodedRazorInputItems" ItemName="_RazorSpecialCharacterWorkaround" />
+	</EncodeRazorInputItem>
+
+	<ItemGroup>
+		<_RazorAdditionalFile Remove="@(_RazorAdditionalFile)" />
+		<_RazorAdditionalFile Include="@(_RazorSpecialCharacterWorkaround)" />
+
+		<AdditionalFiles Include="@(_RazorAdditionalFile)" />
+	</ItemGroup>
+  </Target>
+
   <Target
     Name="RazorGenerateDesignTime"
-    Returns="@(RazorGenerateWithTargetPath)">
+    Returns="">
   </Target>
 
   <Target
     Name="RazorGenerateComponentDesignTime"
-	DependsOnTargets="$(_RazorGenerateComponentDesignTimeDependsOn)"
-	Returns="@(RazorComponentWithTargetPath)">
+	Returns="">
   </Target>
 
 </Project>
