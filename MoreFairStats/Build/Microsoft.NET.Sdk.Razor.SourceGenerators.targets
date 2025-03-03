@@ -16,33 +16,16 @@ Copyright (c) .NET Foundation. All rights reserved.
     BeforeTargets="GenerateMSBuildEditorConfigFileShouldRun"
     DependsOnTargets="PrepareForRazorGenerate;PrepareForRazorComponentGenerate">
 
-    <!-- Configure analyzers -->
     <ItemGroup>
-      <Analyzer Include=".\Build\Microsoft.AspNetCore.Razor.Utilities.Shared.dll;.\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;.\Build\Microsoft.Extensions.ObjectPool.dll;.\Build\System.Collections.Immutable.dll;" />
+      <Analyzer Include=".\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;" />
 
       <RazorComponentWithTargetPath
         GeneratedOutputFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))"
         GeneratedDeclarationFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedDeclaration)))" />
       <RazorGenerateWithTargetPath GeneratedOutputFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <!-- Additional MSBuild metadata and properties that we want the compiler to pass -->
       <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="TargetPath" />
-      <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="CssScope" />
       <CompilerVisibleProperty Include="RazorLangVersion" />
-      <CompilerVisibleProperty Include="RootNamespace" />
-      <CompilerVisibleProperty Include="SupportLocalizedComponentNames" />
-      <CompilerVisibleProperty Include="GenerateRazorMetadataSourceChecksumAttributes" />
-      <CompilerVisibleProperty Include="MSBuildProjectDirectory" />
-      <CompilerVisibleProperty Include="_RazorSourceGeneratorDebug" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <!-- Pass razor files to the compiler. -->
       <_RazorAdditionalFile Include="@(RazorComponentWithTargetPath)" />
-      <!-- Ignore .cshtml files if RazorCompileOnBuild=false -->
-      <_RazorAdditionalFile Include="@(RazorGenerateWithTargetPath)" Condition="'$(RazorCompileOnBuild)' != 'false'" />
     </ItemGroup>
 
     <EncodeRazorInputItem RazorInputItems="@(_RazorAdditionalFile)">
