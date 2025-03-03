@@ -23,8 +23,6 @@
         <GeneratedOutput>Razor\%(RazorComponentWithTargetPath.TargetPath)</GeneratedOutput>
         <GeneratedDeclaration>RazorDeclaration\%(RazorComponentWithTargetPath.TargetPath)</GeneratedDeclaration>
       </RazorComponentWithTargetPath>
-		
-	  <Analyzer Include=".\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;.\Build\Microsoft.AspNetCore.Razor.Utilities.Shared.dll;.\Build\Microsoft.Extensions.ObjectPool.dll;" />
 
 	  <RazorComponentWithTargetPath
 		GeneratedOutputFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))"
@@ -36,9 +34,10 @@
 	</EncodeRazorInputItem>
 
 	<ItemGroup>
-		<AdditionalFiles Include="@(_RazorSpecialCharacterWorkaround)" />
-		<CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="TargetPath" />
-		<CompilerVisibleProperty Include="RazorLangVersion" />
+	  <AdditionalFiles Include="@(_RazorSpecialCharacterWorkaround)" />
+	  <Analyzer Include=".\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;.\Build\Microsoft.AspNetCore.Razor.Utilities.Shared.dll;.\Build\Microsoft.Extensions.ObjectPool.dll;" />
+	  <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="TargetPath" />
+	  <CompilerVisibleProperty Include="RazorLangVersion" />
 	</ItemGroup>
   </Target>
 
