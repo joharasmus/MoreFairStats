@@ -171,7 +171,12 @@
 
   <Import Project=".\Microsoft.NET.Sdk.Razor.SourceGenerators.targets" Condition="'$(UseRazorSourceGenerator)' == 'true'" />
 
-  <Import Project=".\Microsoft.NET.Sdk.Razor.GenerateAssemblyInfo.targets" />
+  <PropertyGroup>
+	<CoreCompileDependsOn Condition="'$(ResolvedRazorCompileToolset)'=='RazorSdk'">
+		$(CoreCompileDependsOn);
+		RazorGetAssemblyAttributes;
+	</CoreCompileDependsOn>
+  </PropertyGroup>
 
   <Target Name="PrepareForRazorGenerate" DependsOnTargets="$(PrepareForRazorGenerateDependsOn)">
   </Target>
