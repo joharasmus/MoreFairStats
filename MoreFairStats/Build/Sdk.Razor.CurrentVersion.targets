@@ -2,15 +2,6 @@
 <Project ToolsVersion="14.0">
 
   <PropertyGroup>
-    <EnableDefaultContentItems Condition=" '$(EnableDefaultContentItems)' == '' ">true</EnableDefaultContentItems>
-  </PropertyGroup>
-
-  <!--
-    This is a hook to import a set of targets before the Razor targets. By default this is unused.
-  -->
-  <Import Project="$(CustomBeforeRazorSdkTargets)" Condition="'$(CustomBeforeRazorSdkTargets)' != '' and Exists('$(CustomBeforeRazorSdkTargets)')"/>
-
-  <PropertyGroup>
     <RazorSdkBuildTasksAssembly>.\Microsoft.NET.Sdk.Razor.Tasks.dll</RazorSdkBuildTasksAssembly>
     <_RazorSdkToolAssembly>.\rzc.dll</_RazorSdkToolAssembly>
   </PropertyGroup>
@@ -22,104 +13,20 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <UseRazorSourceGenerator Condition="'$(UseRazorSourceGenerator)' == '' ">true</UseRazorSourceGenerator>
     <RazorLangVersion>8.0</RazorLangVersion>
-  </PropertyGroup>
 
-  <PropertyGroup>
-    <!--
-      The property IsRazorCompilerReferenced is defined by the 2.x Razor.Design package. We can use this as a best guess to determine if a project is targeting 2.x or earlier.
-      This is useful to provide 3.0 or newer specific build warnings. However, since it's not very reliable, we should not use this to make build-altering decisions.
-    -->
-    <_IsTargetingRazor2X Condition="'$(IsRazorCompilerReferenced)'=='true'">true</_IsTargetingRazor2X>
-  </PropertyGroup>
+    <RazorGenerateIntermediateOutputPath>$(IntermediateOutputPath)Razor\</RazorGenerateIntermediateOutputPath>
 
-  <Import Project="Microsoft.NET.Sdk.Razor.Compilation.targets" Condition="'$(UseRazorSourceGenerator)' != 'true'"/>
+    <_RazorComponentDeclarationOutputPath>$(IntermediateOutputPath)RazorDeclaration\</_RazorComponentDeclarationOutputPath>
 
-  <!--
-    Default values for properties that affect Razor targets to the standard build lifecycle.
-  -->
-  <PropertyGroup>
-    <RazorCompileOnBuild>true</RazorCompileOnBuild>
-    <RazorCompileOnPublish>true</RazorCompileOnPublish>
-  </PropertyGroup>
-
-  <!--
-    Properties that configure Razor SDK, but need to be defined in targets due to evaluation order.
-  -->
-  <PropertyGroup>
-    <!-- Output directory used for generated files -->
-    <RazorGenerateIntermediateOutputPath Condition="'$(RazorGenerateIntermediateOutputPath)'==''">$(IntermediateOutputPath)Razor\</RazorGenerateIntermediateOutputPath>
-
-    <_RazorComponentDeclarationOutputPath Condition="'$(_RazorComponentDeclarationOutputPath)'==''">$(IntermediateOutputPath)RazorDeclaration\</_RazorComponentDeclarationOutputPath>
-
-    <!--
-      Use the suffix .Views when producing compiled view assemblies. This matches the requirements for Mvc's ViewsFeatureProvider.
-    -->
-    <RazorTargetNameSuffix Condition="'$(RazorTargetNameSuffix)'==''">.Views</RazorTargetNameSuffix>
-
-    <!-- Suffix appended to $(TargetName) to produce $(RazorTargetName), the name of the assembly produced by Razor -->
-    <RazorTargetNameSuffix Condition="'$(RazorTargetNameSuffix)' == ''">.Razor</RazorTargetNameSuffix>
-
-    <!-- File name (without extension) of the assembly produced by Razor -->
-    <RazorTargetName Condition="'$(RazorTargetName)'==''">$(TargetName)$(RazorTargetNameSuffix)</RazorTargetName>
-
-    <!--
-      The compatibility zone - these properties were provided by the MVC Precompilation tool and they
-      map to supported settings in Razor SDK.
-
-      We want to set the defaults for these in the .props file, but we need to process the old settings here
-      in case they were set in the project file. The consequence of this is that the old settings will override
-      the new ones if they are set to conflicting values.
-    -->
-    <CopyRazorGenerateFilesToPublishDirectory Condition="'$(MvcRazorExcludeViewFilesFromPublish)'=='true'">false</CopyRazorGenerateFilesToPublishDirectory>
-    <CopyRazorGenerateFilesToPublishDirectory Condition="'$(MvcRazorExcludeViewFilesFromPublish)'=='false'">true</CopyRazorGenerateFilesToPublishDirectory>
-
-    <CopyRefAssembliesToPublishDirectory Condition="'$(MvcRazorExcludeRefAssembliesFromPublish)'=='true'">false</CopyRefAssembliesToPublishDirectory>
-    <CopyRefAssembliesToPublishDirectory Condition="'$(MvcRazorExcludeRefAssembliesFromPublish)'=='false'">true</CopyRefAssembliesToPublishDirectory>
-
-    <!-- Use PreserveCompilationReferences to determine the behavior of CopyRefAssembliesToPublishDirectory if not explicitly specified by the project. -->
-    <CopyRefAssembliesToPublishDirectory Condition="'$(CopyRefAssembliesToPublishDirectory)'==''">$(PreserveCompilationReferences)</CopyRefAssembliesToPublishDirectory>
-
-    <!-- For 2.x projects desktop and .NET Core projects, if they're opting in to runtime compilation (indicated by PreserveCompilationContext=true), set PreserveCompilationReferences = true -->
-    <PreserveCompilationReferences Condition=" '$(PreserveCompilationContext)' == 'true' AND
-      '$(TargetFrameworkIdentifier)' == '.NETFramework' ">true</PreserveCompilationReferences>
-
-    <!--
-      We can't set the actual default value here due to evaluation order (depends on $(OutDir)).
-
-      This handles a compatibility case with MVC Precompilation.
-    -->
-    <RazorOutputPath Condition="'$(MvcRazorOutputPath)'!=''">$([MSBuild]::EnsureTrailingSlash('$(MvcRazorOutputPath)'))</RazorOutputPath>
-
-    <!--
-      Configures whether all of the @(RazorGenerate) items will be added as embedded files to the produced assembly.
-
-      When true, everything in @(RazorGenerate) will be added to @(RazorEmbeddedFiles) and passed to CSC.
-    -->
-    <EmbedRazorGenerateSources Condition="'$(MvcRazorEmbedViewSources)'!=''">$(MvcRazorEmbedViewSources)</EmbedRazorGenerateSources>
-    <EmbedRazorGenerateSources Condition="'$(EmbedRazorGenerateSources)'==''">false</EmbedRazorGenerateSources>
-
-    <!--
-    Set to false to disable Razor code generation from using a persistent build server process.
-    -->
-    <UseRazorBuildServer Condition="'$(UseRazorBuildServer)'==''">$(UseSharedCompilation)</UseRazorBuildServer>
-    <UseRazorBuildServer Condition="'$(UseRazorBuildServer)'==''">true</UseRazorBuildServer>
-
-    <ResolvedRazorCompileToolset>RazorSdk</ResolvedRazorCompileToolset>
+    <UseRazorBuildServer>true</UseRazorBuildServer>
   </PropertyGroup>
 
   <Import Project=".\Microsoft.NET.Sdk.Razor.CodeGeneration.targets" />
 
-  <Import Project=".\Microsoft.NET.Sdk.Razor.Component.targets" Condition="'$(UseRazorSourceGenerator)' != 'true'" />
+  <Import Project=".\Microsoft.NET.Sdk.Razor.Component.targets" />
 
-  <Import Project=".\Microsoft.NET.Sdk.Razor.SourceGenerators.targets" Condition="'$(UseRazorSourceGenerator)' == 'true'" />
-
-  <Target Name="RazorGenerate">
-  </Target>
-
-  <Target Name="RazorCompile" DependsOnTargets="$(RazorCompileDependsOn)" Condition="'$(_UseSourceGenerators)' == ''">
-  </Target>
+  <Import Project=".\Microsoft.NET.Sdk.Razor.SourceGenerators.targets" />
 
   <Target Name="AssignRazorComponentTargetPaths">
     <ItemGroup>

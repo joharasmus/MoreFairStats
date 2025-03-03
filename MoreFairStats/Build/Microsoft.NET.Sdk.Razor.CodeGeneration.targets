@@ -131,46 +131,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       _ResolveRazorGenerateOutputs;
     </RazorCoreGenerateDependsOn>
   </PropertyGroup>
-
-  <Target
-    Name="RazorCoreGenerate"
-    DependsOnTargets="$(RazorCoreGenerateDependsOn)"
-    Inputs="$(MSBuildAllProjects);$(_RazorGenerateInputsHashFile);$(_RazorTagHelperOutputCache);@(RazorGenerateWithTargetPath)"
-    Outputs="@(_RazorGenerateOutput)"
-    Condition="'@(RazorGenerateWithTargetPath)'!= ''">
-
-    <RemoveDir
-      Directories="$(RazorGenerateIntermediateOutputPath)"
-      Condition = "Exists('$(RazorGenerateIntermediateOutputPath)')"/>
-
-    <MakeDir
-      Directories="%(_RazorGenerateOutput.RelativeDir)"
-      Condition="!Exists('%(_RazorGenerateOutput.RelativeDir)')" />
-
-    <SdkRazorGenerate
-      Debug="$(_RazorDebugGenerateCodeTask)"
-      DebugTool="$(_RazorDebugGenerateCodeTool)"
-      ToolAssembly="$(_RazorSdkToolAssembly)"
-      ToolExe="$(_RazorSdkDotNetHostFileName)"
-      ToolPath="$(_RazorSdkDotNetHostDirectory)"
-      UseServer="$(UseRazorBuildServer)"
-      ForceServer="$(_RazorForceBuildServer)"
-      PipeName="$(_RazorBuildServerPipeName)"
-      Version="$(RazorLangVersion)"
-      RootNamespace="$(RootNamespace)"
-      CSharpLanguageVersion="$(LangVersion)"
-      Configuration="@(ResolvedRazorConfiguration)"
-      Extensions="@(ResolvedRazorExtension)"
-      Sources="@(RazorGenerateWithTargetPath)"
-      ProjectRoot="$(MSBuildProjectDirectory)"
-      TagHelperManifest="$(_RazorTagHelperOutputCache)"
-      SupportLocalizedComponentNames="$(SupportLocalizedComponentNames)" />
-
-    <ItemGroup>
-      <FileWrites Include="@(_RazorGenerateOutput)" />
-    </ItemGroup>
-  </Target>
-
+	
   <PropertyGroup>
     <ResolveRazorCompileInputsDependsOn>$(ResolveRazorCompileInputsDependsOn)</ResolveRazorCompileInputsDependsOn>
   </PropertyGroup>
