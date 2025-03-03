@@ -22,8 +22,6 @@
     <UseRazorBuildServer>true</UseRazorBuildServer>
   </PropertyGroup>
 
-  <Import Project=".\Microsoft.NET.Sdk.Razor.Component.targets" />
-
   <Import Project=".\Microsoft.NET.Sdk.Razor.SourceGenerators.targets" />
 
   <Target Name="AssignRazorComponentTargetPaths">
@@ -47,7 +45,6 @@
     Name="RazorGenerateDesignTime"
     Returns="@(RazorGenerateWithTargetPath)">
   </Target>
-
 
   <Target
     Name="RazorGenerateComponentDesignTime"
