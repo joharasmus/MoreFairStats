@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MoreFairStats;
 using MoreFairStats.Components;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder();
 
 var mfsCosmosDbConnStr = builder.Configuration["mfsCosmosDbConnStr"]!;
 var moreFairData = new MoreFairData(mfsCosmosDbConnStr);

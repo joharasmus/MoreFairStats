@@ -18,12 +18,10 @@ public class App : ComponentBase
     <base href=""/"">
     <link rel=""icon"" type=""image/png"" href=""favicon.png"">
     ");
-        __builder.OpenComponent<HeadOutlet>(5);
-        __builder.CloseComponent();
         __builder.CloseElement();
-        __builder.AddMarkupContent(6, "\r\n\r\n");
-        __builder.OpenElement(7, "body");
-        __builder.OpenComponent<Routes>(8);
+        __builder.AddMarkupContent(5, "\r\n\r\n");
+        __builder.OpenElement(6, "body");
+        __builder.OpenComponent<Routes>(7);
         __builder.CloseComponent();
         __builder.CloseElement();
         __builder.CloseElement();
