@@ -25,7 +25,6 @@
   </ItemGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
-  <Import Sdk="Microsoft.NET.Sdk.StaticWebAssets" Project="Sdk.targets" />
   <Import Project=".\Build\Sdk.Razor.CurrentVersion.targets" />
   <Target Name="DotNetPublish" DependsOnTargets="$(_DotNetPublishComputeFiles);$(_DotNetPublishCopyFiles);$(_DotNetPublishTransformFiles);$(_DotNetPublishFiles);" AfterTargets="Build">
   </Target>

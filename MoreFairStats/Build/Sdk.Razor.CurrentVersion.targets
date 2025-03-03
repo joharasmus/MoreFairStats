@@ -24,9 +24,10 @@
         <GeneratedDeclaration>RazorDeclaration\%(RazorComponentWithTargetPath.TargetPath)</GeneratedDeclaration>
       </RazorComponentWithTargetPath>
 
-	  <RazorComponentWithTargetPath
-		GeneratedOutputFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))"
-		GeneratedDeclarationFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedDeclaration)))" />
+	  <RazorComponentWithTargetPath>
+		<GeneratedOutputFullPath>$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))</GeneratedOutputFullPath>
+		<GeneratedDeclarationFullPath>$([System.IO.Path]::GetFullPath(%(GeneratedDeclaration)))</GeneratedDeclarationFullPath>
+	  </RazorComponentWithTargetPath>
 	</ItemGroup>
 
 	<EncodeRazorInputItem RazorInputItems="@(RazorComponentWithTargetPath)">
