@@ -11,7 +11,8 @@
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
-  <Import Sdk="Microsoft.NET.Sdk.Razor" Project="Sdk.props" />
+
+  <Import Project=".\Build\Sdk.Razor.CurrentVersion.props" />
 
   <ItemGroup>
 	<FrameworkReference Include="Microsoft.AspNetCore.App"/>
