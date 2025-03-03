@@ -17,7 +17,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       Defines the list of file extensions that VS will monitor to reload the application.
       We'll only define these for C# projects targeting RazorLangVersion 3.0 or later, and let VS use defaults in other cases.
     -->
-    <UpToDateReloadFileTypes Condition="'$(Language)'=='C#' AND '$(_Targeting30OrNewerRazorLangVersion)' == 'true' AND '$(RazorUpToDateReloadFileTypes)' != ''">$(UpToDateReloadFileTypes);$(RazorUpToDateReloadFileTypes)</UpToDateReloadFileTypes>
+    <UpToDateReloadFileTypes Condition="'$(RazorUpToDateReloadFileTypes)' != ''">$(UpToDateReloadFileTypes);$(RazorUpToDateReloadFileTypes)</UpToDateReloadFileTypes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,7 +34,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       Defines the ability to understand the configuration for the Razor language service provided by
       the runtime/toolset packages. Introduced in 2.1
     -->
-    <ProjectCapability Include="DotNetCoreRazorConfiguration" Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true'"/>
+    <ProjectCapability Include="DotNetCoreRazorConfiguration"/>
 
     <!--
       Activates the set of nesting behaviors we want from solution explorer.

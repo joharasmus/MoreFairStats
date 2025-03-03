@@ -33,7 +33,7 @@ Copyright (c) .NET Foundation. All rights reserved.
       CoreGenerateRazorTargetAssemblyInfo
     </GenerateRazorTargetAssemblyInfoDependsOn>
 
-    <GenerateRazorTargetAssemblyInfoDependsOn Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true'">
+    <GenerateRazorTargetAssemblyInfoDependsOn>
       _ResolveMvcAssemblyAttributes;
       $(GenerateRazorTargetAssemblyInfoDependsOn)
     </GenerateRazorTargetAssemblyInfoDependsOn>
@@ -186,7 +186,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     <_GenerateRazorAssemblyInfoDependsOn>RazorGetAssemblyAttributes;PrepareForBuild;_CoreGenerateRazorAssemblyInfo</_GenerateRazorAssemblyInfoDependsOn>
 
     <!-- In 3.0 or later, we need to invoke a target to determine MVC specific configuration. -->
-    <_GenerateRazorAssemblyInfoDependsOn Condition="'$(_Targeting30OrNewerRazorLangVersion)' == 'true'">
+    <_GenerateRazorAssemblyInfoDependsOn>
       _ResolveMvcAssemblyAttributes;
       $(_GenerateRazorAssemblyInfoDependsOn);
     </_GenerateRazorAssemblyInfoDependsOn>
