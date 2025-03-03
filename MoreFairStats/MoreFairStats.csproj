@@ -26,7 +26,5 @@
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
   <Import Project=".\Build\Sdk.Razor.CurrentVersion.targets" />
-  <Target Name="DotNetPublish" AfterTargets="Build">
-  </Target>
 </Project>
  
