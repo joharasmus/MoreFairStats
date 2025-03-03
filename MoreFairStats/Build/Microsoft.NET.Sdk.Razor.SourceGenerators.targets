@@ -14,7 +14,6 @@
       <RazorComponentWithTargetPath
         GeneratedOutputFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))"
         GeneratedDeclarationFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedDeclaration)))" />
-      <RazorGenerateWithTargetPath GeneratedOutputFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))" />
       <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="TargetPath" />
       <CompilerVisibleProperty Include="RazorLangVersion" />
       <_RazorAdditionalFile Include="@(RazorComponentWithTargetPath)" />
