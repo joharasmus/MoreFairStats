@@ -12,9 +12,16 @@
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
 
-  <Import Project=".\Build\Sdk.Razor.CurrentVersion.props" />
+  <PropertyGroup>
+	<UsingMicrosoftNETSdkRazor>true</UsingMicrosoftNETSdkRazor>
+	<EnableDefaultContentItems>true</EnableDefaultContentItems>
+	<EnableDefaultRazorComponentItems>true</EnableDefaultRazorComponentItems>
+	<CopyRazorGenerateFilesToPublishDirectory>false</CopyRazorGenerateFilesToPublishDirectory>
+	<RazorGenerateOutputFileExtension>.g.cs</RazorGenerateOutputFileExtension>
+  </PropertyGroup>
 
   <ItemGroup>
+	<Content Include="**\*.razor" />
 	<FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Azure.Core" Version="1.45.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.47.1" />
