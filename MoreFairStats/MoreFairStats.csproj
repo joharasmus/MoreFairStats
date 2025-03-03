@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<FrameworkReference Include="Microsoft.AspNetCore.App" IsImplicitlyDefined="true" />
+	<FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Azure.Core" Version="1.45.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.47.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -25,9 +25,8 @@
   </ItemGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
-  <Import Sdk="Microsoft.NET.Sdk.StaticWebAssets" Project="Sdk.targets" />
   <Import Project=".\Build\Sdk.Razor.CurrentVersion.targets" />
-  <Target Name="DotNetPublish" DependsOnTargets="$(_DotNetPublishComputeFiles);$(_DotNetPublishCopyFiles);$(_DotNetPublishTransformFiles);$(_DotNetPublishFiles);" AfterTargets="Build">
+  <Target Name="DotNetPublish" DependsOnTargets="$(_DotNetPublishCopyFiles);$(_DotNetPublishTransformFiles);$(_DotNetPublishFiles);" AfterTargets="Build">
   </Target>
 </Project>
  
