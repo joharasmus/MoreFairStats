@@ -17,7 +17,7 @@ Copyright (c) .NET Foundation. All rights reserved.
     DependsOnTargets="PrepareForRazorGenerate;PrepareForRazorComponentGenerate">
 
     <ItemGroup>
-      <Analyzer Include=".\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;" />
+      <Analyzer Include=".\Build\Microsoft.CodeAnalysis.Razor.Compiler.dll;.\Build\Microsoft.AspNetCore.Razor.Utilities.Shared.dll;" />
 
       <RazorComponentWithTargetPath
         GeneratedOutputFullPath="$([System.IO.Path]::GetFullPath(%(GeneratedOutput)))"
