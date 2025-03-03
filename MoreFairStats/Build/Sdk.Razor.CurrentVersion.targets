@@ -39,13 +39,10 @@
   <PropertyGroup>
     <PrepareForRazorGenerateDependsOn>
       ResolveRazorGenerateInputs;
-      AssignRazorGenerateTargetPaths;
-      _ResolveGeneratedRazorCompileInputs;
     </PrepareForRazorGenerateDependsOn>
 
     <PrepareForRazorGenerateDependsOn Condition="'$(UseRazorSourceGenerator)' != 'true'">
       $(PrepareForRazorGenerateDependsOn);
-      ResolveAssemblyReferenceRazorGenerateInputs;
       ResolveTagHelperRazorGenerateInputs
     </PrepareForRazorGenerateDependsOn>
 
@@ -278,16 +275,6 @@
     </ItemGroup>
   </Target>
 
-  <!--
-    Temporarary workaround for https://github.com/dotnet/aspnetcore/issues/6859. This can be removed after a VS insertion with a newer copy of the DesignTime targets.
-  -->
-  <ItemGroup>
-    <Content Update="$(_RazorComponentInclude)">
-      <Generator>MSBuild:RazorGenerateComponentDeclarationDesignTime</Generator>
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
   <Target Name="AssignRazorComponentTargetPaths" Condition="'@(RazorComponent)' != ''">
     <AssignTargetPath Files="@(RazorComponent)" RootFolder="$(MSBuildProjectDirectory)">
       <Output TaskParameter="AssignedFiles" ItemName="RazorComponentWithTargetPath" />
@@ -305,54 +292,6 @@
       <RazorComponentWithTargetPath Condition="'%(RazorComponentWithTargetPath.DocumentKind)' == ''">
         <DocumentKind>component</DocumentKind>
       </RazorComponentWithTargetPath>
-    </ItemGroup>
-  </Target>
-
-  <Target Name="AssignRazorGenerateTargetPaths" Condition="'@(RazorGenerate)' != ''">
-    <AssignTargetPath Files="@(RazorGenerate)" RootFolder="$(MSBuildProjectDirectory)">
-      <Output TaskParameter="AssignedFiles" ItemName="RazorGenerateWithTargetPath" />
-    </AssignTargetPath>
-
-    <ItemGroup>
-      <RazorGenerateWithTargetPath Condition="'%(RazorGenerateWithTargetPath.GeneratedOutput)' == ''">
-        <GeneratedOutput>$(RazorGenerateIntermediateOutputPath)%(RazorGenerateWithTargetPath.TargetPath)$(RazorGenerateOutputFileExtension)</GeneratedOutput>
-      </RazorGenerateWithTargetPath>
-
-      <RazorGenerateWithTargetPath Condition="'%(RazorGenerateWithTargetPath.DocumentKind)' == ''">
-        <DocumentKind>mvc</DocumentKind>
-      </RazorGenerateWithTargetPath>
-    </ItemGroup>
-  </Target>
-
-  <!--
-    Gathers input assemblies for Tag Helper discovery and compilation. Add items to @(ReferencePath)
-  -->
-  <Target
-    Name="ResolveAssemblyReferenceRazorGenerateInputs"
-    DependsOnTargets="ResolveReferences">
-
-    <ItemGroup>
-      <RazorReferencePath Include="@(ReferencePath)"/>
-
-      <!--
-      RazorReferencePath must include the closure of assemblies required for tag helper discovery to keep parity with the 2.1 Razor.Design package.
-      Use the component declaration assembly, if available or the IntermediateAssembly if no components are involved in the build.
-      -->
-      <RazorReferencePath
-        Include="$(_RazorComponentDeclarationAssemblyFullPath)"
-        Condition="'$(_RazorComponentDeclarationAssemblyFullPath)' != ''" />
-
-      <RazorReferencePath
-        Include="@(IntermediateAssembly->Metadata('FullPath'))"
-        Condition="'$(_RazorComponentDeclarationAssemblyFullPath)' == ''" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="_ResolveGeneratedRazorCompileInputs">
-    <ItemGroup>
-      <RazorCompile
-        Include="%(RazorGenerateWithTargetPath.GeneratedOutput)"
-        Condition="'%(RazorGenerateWithTargetPath.DocumentKind)'=='mvc'" />
     </ItemGroup>
   </Target>
 

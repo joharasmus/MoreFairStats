@@ -88,7 +88,7 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <Target
     Name="RazorGenerateDesignTime"
-    DependsOnTargets="ResolveRazorGenerateInputs;AssignRazorGenerateTargetPaths"
+    DependsOnTargets="ResolveRazorGenerateInputs"
     Returns="@(RazorGenerateWithTargetPath)">
   </Target>
 
