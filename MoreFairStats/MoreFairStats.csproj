@@ -16,7 +16,7 @@
 	<UsingMicrosoftNETSdkRazor>true</UsingMicrosoftNETSdkRazor>
 	<EnableDefaultContentItems>true</EnableDefaultContentItems>
 	<EnableDefaultRazorComponentItems>true</EnableDefaultRazorComponentItems>
-	<CopyRazorGenerateFilesToPublishDirectory>false</CopyRazorGenerateFilesToPublishDirectory>
+	<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 	<RazorGenerateOutputFileExtension>.g.cs</RazorGenerateOutputFileExtension>
   </PropertyGroup>
 
