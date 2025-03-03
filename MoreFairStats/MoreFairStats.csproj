@@ -1,27 +1,18 @@
 ﻿<Project>
   <PropertyGroup>
 	<UsingMicrosoftNETSdkWeb>true</UsingMicrosoftNETSdkWeb>
-	<EnableRazorSdkContent>true</EnableRazorSdkContent>
 	<OutputType>Exe</OutputType>
 	<IsPackable>false</IsPackable>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>c816adc4-e69d-43a3-8a2d-4433f5ee0934</UserSecretsId>
+	<EnableDefaultContentItems>true</EnableDefaultContentItems>
   </PropertyGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.props" />
 
-  <PropertyGroup>
-	<UsingMicrosoftNETSdkRazor>true</UsingMicrosoftNETSdkRazor>
-	<EnableDefaultContentItems>true</EnableDefaultContentItems>
-	<EnableDefaultRazorComponentItems>true</EnableDefaultRazorComponentItems>
-	<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-	<RazorGenerateOutputFileExtension>.g.cs</RazorGenerateOutputFileExtension>
-  </PropertyGroup>
-
   <ItemGroup>
-	<Content Include="**\*.razor" />
 	<FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Azure.Core" Version="1.45.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.47.1" />
@@ -30,6 +21,5 @@
   </ItemGroup>
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
-  <Import Project=".\Build\Sdk.Razor.CurrentVersion.targets" />
 </Project>
  
