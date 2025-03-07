@@ -2,9 +2,6 @@
 name: Build and deploy to Azure Web App
 
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
 
 jobs:
