@@ -8,8 +8,4 @@
     <UserSecretsId>c816adc4-e69d-43a3-8a2d-4433f5ee0934</UserSecretsId>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MoreFairStats\MoreFairStats.csproj" />
-  </ItemGroup>
-
 </Project>
