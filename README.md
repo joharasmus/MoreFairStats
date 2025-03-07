@@ -1,4 +1,2 @@
 # MoreFairStats
-Code for https://morefairstats.azurewebsites.net/.
-
-Cleaned up from a previous version, which is private. 
+Code for management of data displayed on https://tunastats.rasjo.com
