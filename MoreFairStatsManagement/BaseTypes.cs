@@ -7,15 +7,6 @@ public class Config
     public string? id { get; set; }
     public int CurrentMaxRound { get; set; }
 }
-public class RoundAppearance
-{
-    public Dictionary<string, LadderAppearance>? Ladders { get; set; }
-    public List<string>? RoundTypes { get; set; }
-    public string? BasePointsToPromote { get; set; }
-    public string? CreatedOn { get; set; }
-    public string? ClosedOn { get; set; }
-    public int Number { get; set; }
-}
 
 public class RoundStats
 {
@@ -31,45 +22,12 @@ public class RoundStats
 public class LadderStats
 {
     public string? id { get; set; }
-    public List<Ranker>? Rankers { get; set; }
+    public List<LadderRanker>? Rankers { get; set; }
     public string? CreatedOn { get; set; }
     public string? BasePointsToPromote { get; set; }
     public List<string>? LadderTypes { get; set; }
     public int Round { get; set; }
     public int Ladder { get; set; }
-}
-
-public class LadderAppearance
-{
-    public string? CreatedOn { get; set; }
-    public string? BasePointsToPromote { get; set; }
-    public List<string>? LadderTypes { get; set; }
-    public int Rank { get; set; }
-    public string? Points { get; set; }
-    public string? Power { get; set; }
-    public int Bias { get; set; }
-    public int Multi { get; set; }
-    public string? Grapes { get; set; }
-    public string? Vinegar { get; set; }
-    public bool AutoPromote { get; set; }
-    public bool Growing { get; set; }
-}
-
-public class Ranker
-{
-    public int AccountId { get; set; }
-    public string? UserName { get; set; }
-    public int Rank { get; set; }
-    public string? Points { get; set; }
-    public string? Power { get; set; }
-    public int Bias { get; set; }
-    public int Multi { get; set; }
-    public int AssholePoints { get; set; }
-    public string? Grapes { get; set; }
-    public string? Vinegar { get; set; }
-    public bool AutoPromote { get; set; }
-    public bool Growing { get; set; }
-    public int ChampionPoints { get; set; }
 }
 
 public class LadderRanker
@@ -98,21 +56,13 @@ public class Player
     public int AHPoints { get; set; }
 }
 
-public class Champion
-{
-    public int AccountId { get; set; }
-    public string? UserName { get; set; }
-    public Dictionary<int, int> ChampionPoints { get; set; } = [];
-    public int ChampionPointsSum => ChampionPoints.Values.Sum();
-}
-
 public class MoreFairData
 {
-    private Container LadderDb { get; init; }
-    private Container RoundDb { get; init; }
-    private Container ConfigDb { get; init; }
-    private Container RankersDb { get; init; }
-    private Container PlayersDb { get; init; }
+    public Container LadderDb { get; init; }
+    public Container RoundDb { get; init; }
+    public Container ConfigDb { get; init; }
+    public Container RankersDb { get; init; }
+    public Container PlayersDb { get; init; }
 
     public List<Player> PlayerList { get; init; } = new List<Player>();
     public Dictionary<int, Player> PlayerDictionary { get; set; } = new Dictionary<int, Player>();
@@ -144,16 +94,6 @@ public class MoreFairData
         => await RoundDb.ReadItem<RoundStats>(round.ToString(), round);
     public async Task<Player> GetPlayer(int accountId)
         => await PlayersDb.ReadItem<Player>(accountId.ToString(), accountId.ToString());
-
-    public async Task<FeedResponse<Player>> GetManyPlayers(IReadOnlyList<string> items)
-    {
-        var itemsWithPartitionKeys = new List<(string, PartitionKey)>();
-        foreach (var item in items)
-        {
-            itemsWithPartitionKeys.Add((item, new PartitionKey(item)));
-        }
-        return await PlayersDb.ReadManyItemsAsync<Player>(itemsWithPartitionKeys);
-    }
 
     public async Task Upsert(LadderStats ladderStats)
         => await LadderDb.UpsertItem(ladderStats, ladderStats.Round);
